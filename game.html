@@ -1,0 +1,1313 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>日本交流對話任務</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: profile card + a passport of six stamp slots (one per scene from the real itinerary) → a chat scene where the computer plays a Japanese person and the student picks replies. */
+/* Theme: same washi paper, sumi ink, sign-yellow and torii-red as the trip site. */
+:root {
+  --bg: #F6EFE0; --surface: #FFFBF2; --ink: #3B2F28; --muted: #6F5F52; --line: #E2D5BE;
+  --sign: #EDB02C; --sign-ink: #7F5200; --sign-soft: #FBEFC8; --on-sign: #3B2F28; --torii: #B8452F;
+  --ok: #4E7A3E; --ok-soft: #E1ECD6; --bad: #A3322B; --bad-soft: #F7DAD3; --blossom: #F2B8C0; --npc: #E9E0CF;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-mono: "DM Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1E1713; --surface: #2A211B; --ink: #F1E6D4; --muted: #BBA996; --line: #4A3B30;
+    --sign: #F0BE4A; --sign-ink: #F2C968; --sign-soft: #4A3A14; --on-sign: #2A1D08; --torii: #E58B78;
+    --ok: #A5CC93; --ok-soft: #26331F; --bad: #F4A096; --bad-soft: #45211D; --blossom: #D98A99; --npc: #3A2E25;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1E1713; --surface: #2A211B; --ink: #F1E6D4; --muted: #BBA996; --line: #4A3B30;
+  --sign: #F0BE4A; --sign-ink: #F2C968; --sign-soft: #4A3A14; --on-sign: #2A1D08; --torii: #E58B78;
+  --ok: #A5CC93; --ok-soft: #26331F; --bad: #F4A096; --bad-soft: #45211D; --blossom: #D98A99; --npc: #3A2E25;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+  background-image: radial-gradient(circle at 15% 0%, color-mix(in srgb, var(--blossom) 18%, transparent), transparent 40%);
+  background-attachment: fixed;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--sign-ink); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-serif); text-wrap: balance; }
+
+/* home */
+.hero { padding: 32px 0 18px; display: grid; gap: 10px; }
+.hero .org { font-size: 14px; letter-spacing: .08em; color: var(--muted); margin: 0; }
+.hero h1 { margin: 0; font-size: clamp(28px, 6vw, 40px); line-height: 1.2; font-weight: 900; }
+.hero p.lead { margin: 0; color: var(--muted); max-width: 60ch; border-left: 3px solid var(--blossom); padding-left: 12px; }
+
+.profile { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin: 8px 0 22px; display: grid; gap: 14px; }
+.pf-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; }
+.pf-head h2 { margin: 0; font-size: 20px; }
+.pf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 16px; }
+.fld { display: grid; gap: 4px; min-width: 0; align-content: start; }
+.flab, .fld > span { font-size: 13px; font-weight: 700; color: var(--muted); }
+.fld input, .fld select { font: inherit; font-size: 16px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; width: 100%; min-width: 0; }
+.langrow { display: grid; gap: 6px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; max-width: 420px; }
+.seg button { background: var(--surface); border: 0; padding: 10px 12px; cursor: pointer; display: grid; gap: 0; text-align: center; }
+.seg button + button { border-left: 2px solid var(--ink); }
+.seg button b { font-family: var(--font-serif); font-size: 20px; line-height: 1.3; }
+.seg button small { font-size: 12px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button[aria-pressed="true"] small { color: var(--bg); opacity: .8; }
+.custom { display: grid; gap: 6px; padding: 8px; border: 1px dashed var(--line); border-radius: 10px; margin-top: 2px; }
+.custom input { font-size: 15px; padding: 6px 10px; }
+.custom small { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.preview { font-size: 14px; color: var(--muted); background: var(--sign-soft); border-radius: 10px; padding: 8px 12px; display: grid; gap: 2px; }
+.preview b { color: var(--ink); font-weight: 700; }
+.preview .r { font-family: var(--font-mono); color: var(--sign-ink); font-size: 13px; }
+.toggle { font-weight: 700; font-size: 15px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+.toggle[aria-pressed="true"] { background: var(--sign); color: var(--on-sign); border-color: var(--sign); }
+
+.passport { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 24px -16px rgba(90,55,35,.5); }
+.pp-head { background: var(--ink); color: var(--bg); padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; }
+.pp-head h2 { margin: 0; font-size: 22px; }
+.pp-head span { font-family: var(--font-mono); font-size: 14px; opacity: .85; }
+.scenes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.scene {
+  text-align: left; background: transparent; border: 0; border-right: 1px dashed var(--line); border-bottom: 1px dashed var(--line);
+  padding: 16px 18px; cursor: pointer; display: grid; grid-template-columns: minmax(0,1fr) 72px; gap: 4px 12px; align-items: center; min-width: 0;
+}
+.scene:hover { background: var(--sign-soft); }
+.scene .day { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--sign-ink); }
+.scene h3 { margin: 0; font-size: 18px; line-height: 1.3; }
+.scene .who { font-size: 14px; color: var(--muted); }
+.scene .txt { display: grid; gap: 2px; min-width: 0; }
+.slot { width: 68px; height: 68px; border-radius: 50%; border: 2px dashed var(--line); display: grid; place-items: center; color: var(--line); font-family: var(--font-serif); font-size: 26px; font-weight: 900; }
+.slot.got { border: 3px double var(--torii); color: var(--torii); transform: rotate(-10deg); background: color-mix(in srgb, var(--torii) 7%, transparent); }
+.stars { font-size: 14px; color: var(--sign-ink); letter-spacing: 2px; grid-column: 1 / -1; }
+.howto { margin-top: 22px; display: grid; gap: 6px; color: var(--muted); font-size: 15px; }
+.howto b { color: var(--ink); }
+
+/* play */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); padding: 10px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 11; background: var(--bg); }
+.back { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 700; font-size: 15px; }
+.back:hover { border-color: var(--sign); }
+.tb-title { flex: 1; min-width: 0; }
+.tb-title b { display: block; font-family: var(--font-serif); font-size: 18px; line-height: 1.3; }
+.tb-title small { color: var(--muted); font-size: 13px; }
+.dots { display: flex; gap: 5px; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--line); }
+.dots i.ok { background: var(--ok); } .dots i.half { background: var(--sign); } .dots i.now { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+.chat { display: grid; gap: 14px; padding: 20px 0 8px; }
+.row { display: flex; gap: 10px; align-items: flex-end; max-width: 92%; }
+.row.me { margin-left: auto; flex-direction: row-reverse; }
+.av { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-serif); font-weight: 900; font-size: 19px; background: var(--ink); color: var(--bg); }
+.row.me .av { background: var(--sign); color: var(--on-sign); font-size: 15px; }
+.bub { background: var(--npc); border-radius: 18px 18px 18px 4px; padding: 10px 14px; min-width: 0; display: grid; gap: 2px; }
+.row.me .bub { background: var(--sign-soft); border-radius: 18px 18px 4px 18px; }
+.bub .ja { font-size: 20px; font-weight: 700; line-height: 1.45; overflow-wrap: anywhere; }
+.ro { font-family: var(--font-mono); font-size: 13px; color: var(--sign-ink); overflow-wrap: anywhere; }
+.bub .zh { font-size: 14px; color: var(--muted); }
+.bub .name { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.say { justify-self: start; display: inline-flex; gap: 6px; align-items: center; background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: 13px; cursor: pointer; margin-top: 4px; color: var(--sign-ink); }
+.say:hover { border-color: var(--sign); }
+.say.playing svg { animation: pulse .9s infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.note { border-radius: 12px; padding: 10px 14px; font-size: 15px; display: flex; gap: 10px; align-items: start; }
+.note.good { background: var(--ok-soft); } .note.good b { color: var(--ok); }
+.note.bad { background: var(--bad-soft); } .note.bad b { color: var(--bad); }
+.note b { flex: none; }
+
+.choices { display: grid; gap: 10px; padding-top: 10px; }
+.choices h3 { margin: 0; font-family: var(--font-sans); font-size: 14px; color: var(--muted); font-weight: 700; letter-spacing: .06em; }
+.opt { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: 4px 6px 4px 4px; }
+.opt.wrong { border-color: var(--bad); opacity: .55; }
+.opt .pick { text-align: left; background: transparent; border: 0; padding: 10px 12px; cursor: pointer; display: grid; gap: 2px; border-radius: 10px; min-width: 0; }
+.opt .pick:hover:not(:disabled) { background: var(--sign-soft); }
+.opt .pick:disabled { cursor: default; }
+.opt .pja { font-size: 19px; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+.opt .pzh { font-size: 14px; color: var(--muted); }
+.opt .say { margin: 0; padding: 8px 12px; }
+.next { justify-self: end; background: var(--sign); color: var(--on-sign); border: 0; border-radius: 999px; padding: 10px 24px; font-weight: 900; font-size: 17px; cursor: pointer; }
+.next:hover { filter: brightness(1.06); }
+
+/* result */
+.result { margin-top: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 26px 20px; display: grid; gap: 12px; justify-items: center; text-align: center; }
+.big-stamp { width: 132px; height: 132px; border-radius: 50%; border: 5px double var(--torii); color: var(--torii); display: grid; place-items: center; font-family: var(--font-serif); font-weight: 900; font-size: 54px; line-height: 1; transform: rotate(-12deg); }
+.big-stamp small { display: block; font-size: 12px; font-family: var(--font-mono); letter-spacing: .1em; margin-top: 4px; }
+.big-stamp.in { animation: stamp .45s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes stamp { from { transform: rotate(-12deg) scale(2.2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 1; } }
+.result h2 { margin: 0; font-size: 26px; }
+.result .sc { font-size: 22px; color: var(--sign-ink); letter-spacing: 4px; }
+.result p { margin: 0; color: var(--muted); max-width: 46ch; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.btns button { border-radius: 999px; padding: 9px 20px; font-weight: 700; cursor: pointer; border: 1px solid var(--line); background: var(--bg); }
+.btns button.primary { background: var(--sign); color: var(--on-sign); border-color: var(--sign); }
+[hidden] { display: none !important; }
+.tgls { display: flex; flex-wrap: wrap; gap: 8px; }
+.mic-card { border: 2px dashed var(--sign); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; background: var(--surface); }
+.mc-h { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.mc-h b { font-size: 16px; } .mc-h span { font-size: 14px; color: var(--muted); }
+.mc-t { font-size: 19px; font-weight: 700; display: grid; overflow-wrap: anywhere; }
+.mc-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.mic { display: inline-flex; gap: 8px; align-items: center; background: var(--ink); color: var(--bg); border: 0; border-radius: 999px; padding: 10px 20px; font-weight: 900; font-size: 16px; cursor: pointer; }
+.mic.rec { background: var(--bad); color: #fff; animation: pulse 1s infinite; }
+.mc-st { margin: 0; font-size: 14px; color: var(--muted); flex: 1 1 160px; min-width: 0; overflow-wrap: anywhere; }
+.mc-res { display: flex; gap: 14px; align-items: center; border-radius: 12px; padding: 10px 14px; }
+.mc-res.great { background: var(--ok-soft); } .mc-res.ok { background: var(--sign-soft); } .mc-res.low { background: var(--bad-soft); }
+.mc-score { display: grid; justify-items: center; flex: none; min-width: 56px; }
+.mc-score b { font-family: var(--font-mono); font-size: 32px; line-height: 1; }
+.mc-score small { font-size: 12px; color: var(--muted); }
+.mc-fb { display: grid; gap: 2px; font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
+.mc-fb b { font-size: 15px; }
+.speak-sum b { font-family: var(--font-mono); font-size: 20px; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .mic.rec { animation: none; } }
+/* 2.5D stage */
+.task { margin: 12px 0 10px; font-size: 15px; display: flex; gap: 10px; align-items: baseline; }
+.task b { flex: none; background: var(--sign); color: var(--on-sign); font-size: 13px; padding: 2px 10px; border-radius: 999px; }
+.stage { position: relative; border-radius: 18px; overflow: hidden; border: 2px solid var(--ink); background: var(--npc); }
+#world { display: block; width: 100%; height: clamp(340px, 62vh, 580px); touch-action: none; cursor: pointer; }
+#world:focus-visible { outline: 3px solid var(--sign-ink); outline-offset: -3px; }
+.talk { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: var(--sign); color: var(--on-sign); border: 2px solid var(--on-sign); border-radius: 999px; padding: 10px 22px; font-weight: 900; font-size: 17px; cursor: pointer; display: flex; gap: 10px; align-items: center; white-space: nowrap; max-width: calc(100% - 24px); overflow: hidden; box-shadow: 0 6px 16px -8px rgba(0,0,0,.5); }
+.talk small { font-family: var(--font-mono); font-size: 11px; font-weight: 500; border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; opacity: .8; }
+@media (pointer: coarse) { .talk small { display: none; } }
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-top: 12px; }
+.dpad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 44px); gap: 4px; }
+.dpad button { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; font-size: 16px; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+.dpad button.on { background: var(--sign); color: var(--on-sign); }
+.dpad .u { grid-column: 2; grid-row: 1; } .dpad .l { grid-column: 1; grid-row: 2; } .dpad .r { grid-column: 3; grid-row: 2; } .dpad .d { grid-column: 2; grid-row: 3; }
+.keys { margin: 0; color: var(--muted); font-size: 14px; flex: 1 1 220px; min-width: 0; }
+@media (pointer: fine) { .dpad { display: none; } }
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(30,23,19,.35); }
+.sheet { position: fixed; z-index: 31; left: 50%; transform: translateX(-50%); bottom: 0; width: min(760px, 100%); max-height: 82vh; display: flex; flex-direction: column;
+  background: var(--bg); border: 2px solid var(--ink); border-bottom: 0; border-radius: 20px 20px 0 0; box-shadow: 0 -12px 30px -14px rgba(0,0,0,.5); }
+.sheet-head { display: flex; align-items: center; gap: 12px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.sheet-head b { font-family: var(--font-serif); font-size: 19px; flex: 1; min-width: 0; }
+.sheet-body { overflow-y: auto; padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); overscroll-behavior: contain; }
+.sheet .chat { padding-top: 14px; }
+.charrow { display: flex; gap: 14px; align-items: center; }
+#avatar { width: 64px; height: 72px; flex: none; background: var(--sign-soft); border-radius: 14px; }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch { width: 36px; height: 36px; border-radius: 50%; background: var(--c); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+.swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.vnote { background: var(--sign-soft); border-radius: 12px; padding: 10px 14px; font-size: 14px; margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .big-stamp.in, .say.playing svg { animation: none; } }
+@media (max-width: 480px) { .bub .ja { font-size: 18px; } .opt .pja { font-size: 17px; } .row { max-width: 100%; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <section id="home">
+    <header class="hero">
+      <p class="org">公埔國小 · 赴日本國際交流</p>
+      <h1>日本交流對話任務</h1>
+      <p class="lead">先選要練習日文還是英文。走進六個行程場景，操控自己的角色去找審查官、日本同學、店員和工作人員說話。聽懂對方的話，選出最合適的回答，完成任務就能蓋上護照章。</p>
+    </header>
+
+    <div class="profile">
+      <div class="pf-head"><h2>我的資料</h2><div class="tgls"><button class="toggle" id="speakToggle" type="button" aria-pressed="true">口說練習：開</button><button class="toggle" id="zhToggle" type="button" aria-pressed="true">中文翻譯：開</button></div></div>
+      <div class="langrow"><span class="flab">我要練習</span><div class="seg" id="langSeg" role="group" aria-label="練習語言"><button type="button" data-lang="ja" aria-pressed="true"><b lang="ja">日本語</b><small>日文</small></button><button type="button" data-lang="en" aria-pressed="false"><b lang="en">English</b><small>英文</small></button></div></div>
+      <div class="pf-grid">
+        <label class="fld" for="pname"><span>我的名字</span><input id="pname" type="text" maxlength="12" placeholder="例如：王小明"></label>
+        <label class="fld" for="pnamero"><span id="nameRoLabel">名字的念法（羅馬拼音）</span><input id="pnamero" type="text" maxlength="30" placeholder="例如：Wang Xiaoming"></label>
+      </div>
+      <div class="pf-grid" id="picks"></div>
+      <div class="charrow"><canvas id="avatar" width="64" height="72" aria-hidden="true"></canvas><div class="fld"><span class="flab">我的角色衣服顏色</span><div class="swatches" id="colors" role="group" aria-label="衣服顏色"></div></div></div>
+      <div class="preview" id="preview" aria-live="polite"></div>
+    </div>
+
+    <div class="passport">
+      <div class="pp-head"><h2 id="ppTitle">交流護照</h2><span id="ppCount">已蓋章 0 / 6</span></div>
+      <div class="scenes" id="scenes"></div>
+    </div>
+    <div class="howto">
+      <div><b>怎麼玩：</b>先填好我的資料，再點一個場景進去。操控自己的角色走到頭上有「！」的人物旁邊開始對話；其他路人也可以點點看。對話時按「聽」聽發音，按回答卡片就是選它。</div>
+      <div><b>星星：</b>第一次就選對越多題，星星越多。選錯沒關係，看完說明再選一次。</div>
+      <div><b>口說練習：</b>每句選對後，按麥克風念出那句話，電腦會用語音辨識聽你說了什麼，並給 0–100 分。第一次使用時，瀏覽器會詢問是否允許麥克風，請按「允許」。</div>
+      <div><b>關於錄音：</b>語音辨識由瀏覽器提供（Chrome、Edge 由 Google，Safari 由 Apple），說話的聲音會送到他們的伺服器轉成文字。這個網站不會保存錄音或文字。<span id="speakNote"></span></div>
+      <div><b>挑戰模式：</b><span id="howtoMode"></span></div>
+    </div>
+    <p class="vnote" id="vnote" hidden></p>
+  </section>
+
+  <section id="play" hidden>
+    <div class="topbar">
+      <button class="back" id="back" type="button">← 選單</button>
+      <div class="tb-title"><b id="tbTitle"></b><small id="tbPlace"></small></div>
+    </div>
+    <p class="task" id="task"></p>
+    <div class="stage">
+      <canvas id="world" tabindex="0" aria-label="遊戲場景。用方向鍵移動，走到人物旁邊按空白鍵說話。"></canvas>
+      <button class="talk" id="talkBtn" type="button" hidden></button>
+    </div>
+    <div class="controls">
+      <div class="dpad" aria-label="移動">
+        <button type="button" data-d="-1,-1" class="u" aria-label="往上">▲</button>
+        <button type="button" data-d="-1,1" class="l" aria-label="往左">◀</button>
+        <button type="button" data-d="1,-1" class="r" aria-label="往右">▶</button>
+        <button type="button" data-d="1,1" class="d" aria-label="往下">▼</button>
+      </div>
+      <p class="keys">電腦：方向鍵或 WASD 移動，空白鍵說話。<br>手機：點地板走過去，點人物就會走過去說話，也可以用方向鍵。</p>
+    </div>
+  </section>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetName">
+  <div class="sheet-head"><b id="sheetName"></b><div class="dots" id="dots" aria-label="進度"></div><button class="back" id="closeSheet" type="button">離開對話</button></div>
+  <div class="sheet-body" id="sheetBody">
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="choices" id="choices"></div>
+    <div id="result"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+"use strict";
+/* Choice lists: [中文, 日文, 羅馬拼音, 英文] ; instruments: [中文, 日文, 拼音, [日文動詞, 拼音, 中文動詞], 英文] */
+var LISTS = {
+  inst: { label: "我負責的樂器", items: [
+    ["豎笛", "クラリネット", "kurarinetto", ["ふきます", "fukimasu", "吹"], "the clarinet"],
+    ["長笛", "フルート", "furūto", ["ふきます", "fukimasu", "吹"], "the flute"],
+    ["小號", "トランペット", "toranpetto", ["ふきます", "fukimasu", "吹"], "the trumpet"],
+    ["長號", "トロンボーン", "toronbōn", ["ふきます", "fukimasu", "吹"], "the trombone"],
+    ["低音號", "チューバ", "chūba", ["ふきます", "fukimasu", "吹"], "the tuba"],
+    ["上低音號", "ユーフォニアム", "yūfoniamu", ["ふきます", "fukimasu", "吹"], "the euphonium"],
+    ["Alto saxophone", "アルトサックス", "aruto sakkusu", ["ふきます", "fukimasu", "吹"], "the alto saxophone"],
+    ["Tenor saxophone", "テナーサックス", "tenā sakkusu", ["ふきます", "fukimasu", "吹"], "the tenor saxophone"],
+    ["上低音 saxophone", "バリトンサックス", "bariton sakkusu", ["ふきます", "fukimasu", "吹"], "the baritone saxophone"],
+    ["打擊樂", "打楽器", "dagakki", ["演奏します", "ensō shimasu", "演奏"], "percussion"],
+    ["法國號", "ホルン", "horun", ["ふきます", "fukimasu", "吹"], "the French horn"]
+  ]},
+  hobby: { label: "我的興趣", items: [
+    ["足球", "サッカー", "sakkā", "playing soccer"], ["籃球", "バスケットボール", "basukettobōru", "playing basketball"], ["棒球", "野球", "yakyū", "playing baseball"],
+    ["游泳", "水泳", "suiei", "swimming"], ["跳舞", "ダンス", "dansu", "dancing"], ["看書", "読書", "dokusho", "reading"],
+    ["畫畫", "絵をかくこと", "e o kaku koto", "drawing"], ["看漫畫", "漫画", "manga", "reading manga"], ["看動畫", "アニメ", "anime", "watching anime"],
+    ["打電動", "ゲーム", "gēmu", "playing video games"], ["做菜", "料理", "ryōri", "cooking"], ["音樂", "音楽", "ongaku", "music"]
+  ]},
+  food: { label: "我喜歡的食物", items: [
+    ["拉麵", "ラーメン", "rāmen", "ramen"], ["壽司", "すし", "sushi", "sushi"], ["牛肉麵", "牛肉麺", "gyūniku-men", "beef noodle soup"],
+    ["滷肉飯", "ルーローハン", "rūrōhan", "braised pork rice"], ["小籠包", "小籠包", "shōronpō", "soup dumplings"], ["咖哩飯", "カレーライス", "karē raisu", "curry rice"],
+    ["炸雞", "からあげ", "karaage", "fried chicken"], ["餃子", "ぎょうざ", "gyōza", "dumplings"], ["草莓", "いちご", "ichigo", "strawberries"],
+    ["巧克力", "チョコレート", "chokorēto", "chocolate"], ["冰淇淋", "アイスクリーム", "aisu kurīmu", "ice cream"], ["珍珠奶茶", "タピオカミルクティー", "tapioka mirukutī", "bubble tea"]
+  ]}
+};
+
+/* Turn: [NPC 日文, NPC 拼音, NPC 中文, options]. Option: [日文, 拼音, 中文, 對/錯, 說明] */
+var SCENES = [
+ { id: "kix", day: "DAY 1 · 12/14", stamp: "空", title: "關西機場入境", place: "關西國際機場・入境審查", npc: "入境審查官", av: "審", turns: [
+  ["こんにちは。パスポートを見せてください。", "konnichiwa. pasupōto o misete kudasai.", "你好，請出示護照。", [
+    ["はい、どうぞ。", "hai, dōzo.", "好的，請。", 1, "把東西交給別人時說「どうぞ」，很有禮貌。"],
+    ["いただきます。", "itadakimasu.", "我開動了。", 0, "「いただきます」是吃飯前說的話。這裡要把護照交出去。"],
+    ["さようなら。", "sayōnara.", "再見。", 0, "才剛開始，還不能說再見喔。"]]],
+  ["旅行の目的は何ですか？", "ryokō no mokuteki wa nan desu ka?", "旅行的目的是什麼？", [
+    ["学校の交流です。", "gakkō no kōryū desu.", "是學校交流。", 1, "清楚說出目的，審查官就放心了。"],
+    ["トイレはどこですか？", "toire wa doko desu ka?", "廁所在哪裡？", 0, "審查官在問你來日本做什麼。"],
+    ["おいしいです。", "oishii desu.", "很好吃。", 0, "這句是稱讚食物，答非所問。"]]],
+  ["何日間、日本にいますか？", "nannichikan, Nihon ni imasu ka?", "你會在日本待幾天？", [
+    ["五日間です。", "itsukakan desu.", "五天。", 1, "12/14 到 12/18，一共五天。"],
+    ["五人です。", "gonin desu.", "五個人。", 0, "「人」是人數，對方問的是天數「日間」。"],
+    ["台湾から来ました。", "Taiwan kara kimashita.", "我從台灣來。", 0, "這句很好用，但這裡問的是待幾天。"]]],
+  ["どこに泊まりますか？", "doko ni tomarimasu ka?", "你住在哪裡？", [
+    ["京都と大阪のホテルです。", "Kyōto to Ōsaka no hoteru desu.", "京都和大阪的飯店。", 1, "前兩晚住京都，後兩晚住大阪。"],
+    ["駅はどこですか？", "eki wa doko desu ka?", "車站在哪裡？", 0, "對方問你住哪裡，不是問路。"],
+    ["これをください。", "kore o kudasai.", "請給我這個。", 0, "這是買東西時說的。"]]],
+  ["ようこそ日本へ。楽しんでくださいね。", "yōkoso Nihon e. tanoshinde kudasai ne.", "歡迎來到日本，好好玩喔。", [
+    ["ありがとうございます！", "arigatō gozaimasu!", "謝謝！", 1, "對方歡迎你，回一句謝謝就很完美。"],
+    ["ごちそうさまでした。", "gochisōsama deshita.", "謝謝招待（吃完飯說）。", 0, "這是吃完飯才說的。"],
+    ["すみません、わかりません。", "sumimasen, wakarimasen.", "對不起，我不懂。", 0, "對方在歡迎你，回一句謝謝就好。"]]]
+ ]},
+ { id: "uji", day: "DAY 2 · 12/15", stamp: "宇", title: "南部小學音樂交流", place: "宇治市立南部小學", npc: "日本同學 ゆい", av: "ゆ", turns: [
+  ["はじめまして！わたしは ゆい です。", "hajimemashite! watashi wa Yui desu.", "初次見面！我是結衣。", [
+    ["はじめまして。{name}です。よろしくお願いします。", "hajimemashite. {name_ro} desu. yoroshiku onegaishimasu.", "初次見面，我是{name}，請多指教。", 1, "自我介紹三步驟：はじめまして、說名字、よろしくお願いします。"],
+    ["いらっしゃいませ。", "irasshaimase.", "歡迎光臨。", 0, "這是店員招呼客人的話。"],
+    ["いくらですか？", "ikura desu ka?", "多少錢？", 0, "這是問價錢的話。"]]],
+  ["どこから来ましたか？", "doko kara kimashita ka?", "你從哪裡來？", [
+    ["台湾の桃園から来ました。", "Taiwan no Tōen kara kimashita.", "我從台灣桃園來。", 1, "說出城市，對方更容易記得你。"],
+    ["京都のホテルです。", "Kyōto no hoteru desu.", "京都的飯店。", 0, "對方問你從哪裡來，不是住哪裡。"],
+    ["五日間です。", "itsukakan desu.", "五天。", 0, "這是在回答天數。"]]],
+  ["今日は、なんの楽器を演奏しますか？", "kyō wa, nan no gakki o ensō shimasu ka?", "你今天負責什麼樂器？", [
+    ["{inst}。", "{inst_ro}.", "{inst_zh}。", 1, "說出樂器名稱和動作。日文的彈、吹、打用不同的動詞喔。"],
+    ["はい、そうです。", "hai, sō desu.", "是的，沒錯。", 0, "對方問「什麼」樂器，要說出名稱。"],
+    ["お水をください。", "omizu o kudasai.", "請給我水。", 0, "這是點餐時說的。"]]],
+  ["いっしょに歌いましょう！", "issho ni utaimashō!", "我們一起唱歌吧！", [
+    ["はい、歌いましょう！", "hai, utaimashō!", "好，一起唱吧！", 1, "「〜ましょう」是邀請，用同樣的說法回答就好。"],
+    ["いいえ、けっこうです。", "iie, kekkō desu.", "不用了。", 0, "這樣拒絕會讓對方很失望，交流時盡量參加。"],
+    ["助けてください。", "tasukete kudasai.", "請救救我。", 0, "這是緊急求救用的。"]]],
+  ["今日は楽しかった？", "kyō wa tanoshikatta?", "今天開心嗎？", [
+    ["とても楽しかったです！", "totemo tanoshikatta desu!", "非常開心！", 1, "把開心說出來，對方也會很高興。"],
+    ["お腹が痛いです。", "onaka ga itai desu.", "我肚子痛。", 0, "如果真的不舒服要告訴老師，但這裡對方在問開不開心。"],
+    ["いただきます。", "itadakimasu.", "我開動了。", 0, "這是吃飯前說的。"]]],
+  ["これ、ゆいからのプレゼント。また会おうね！", "kore, Yui kara no purezento. mata aō ne!", "這是我送你的禮物。我們再見面吧！", [
+    ["ありがとう！また会いましょう！", "arigatō! mata aimashō!", "謝謝！我們再見面吧！", 1, "收到禮物先道謝，再約下次見面。"],
+    ["いくらですか？", "ikura desu ka?", "多少錢？", 0, "禮物不能問價錢喔。"],
+    ["いりません。", "irimasen.", "我不要。", 0, "直接拒絕禮物很失禮。"]]]
+ ]},
+ { id: "lunch", day: "DAY 2 · 12/15", stamp: "食", title: "宇治定食午餐", place: "宇治的餐廳", npc: "餐廳店員", av: "店", turns: [
+  ["いらっしゃいませ！何名様ですか？", "irasshaimase! nanmei-sama desu ka?", "歡迎光臨！請問幾位？", [
+    ["二人です。", "futari desu.", "兩位。", 1, "同組兩人一起吃飯。"],
+    ["台湾人です。", "Taiwan-jin desu.", "我是台灣人。", 0, "店員問的是人數。"],
+    ["さようなら。", "sayōnara.", "再見。", 0, "才剛進門呢。"]]],
+  ["お飲み物はいかがですか？", "onomimono wa ikaga desu ka?", "要喝點什麼嗎？", [
+    ["お茶をお願いします。", "ocha o onegaishimasu.", "請給我茶。", 1, "宇治是有名的抹茶產地，可以喝喝看這裡的茶。"],
+    ["お会計をお願いします。", "okaikei o onegaishimasu.", "請結帳。", 0, "才剛坐下，吃完才結帳。"],
+    ["トイレはどこですか？", "toire wa doko desu ka?", "廁所在哪裡？", 0, "可以問，但先回答店員的問題。"]]],
+  ["アレルギーはありますか？", "arerugī wa arimasu ka?", "你有過敏的食物嗎？", [
+    ["えびのアレルギーがあります。", "ebi no arerugī ga arimasu.", "我對蝦子過敏。", 1, "有過敏一定要說，也可以請老師幫忙。"],
+    ["いいえ、ありません。", "iie, arimasen.", "沒有。", 1, "沒有過敏就這樣回答。"],
+    ["おいしいです。", "oishii desu.", "很好吃。", 0, "還沒吃到呢，而且店員問的是過敏。"]]],
+  ["お待たせしました。宇治の定食です。どうぞ。", "omatase shimashita. Uji no teishoku desu. dōzo.", "讓你久等了，這是宇治定食，請用。", [
+    ["いただきます！", "itadakimasu!", "我開動了！", 1, "日本人開動前會雙手合十說這句。"],
+    ["ごちそうさまでした！", "gochisōsama deshita!", "謝謝招待！", 0, "這是吃完才說的。"],
+    ["はじめまして。", "hajimemashite.", "初次見面。", 0, "這是第一次認識人時說的。"]]],
+  ["お味はいかがですか？", "oaji wa ikaga desu ka?", "味道怎麼樣？", [
+    ["とてもおいしいです！", "totemo oishii desu!", "非常好吃！", 1, "「おいしい」是最常用的稱讚。"],
+    ["これをください。", "kore o kudasai.", "請給我這個。", 0, "已經上菜了，店員在問味道。"],
+    ["もう一度お願いします。", "mō ichido onegaishimasu.", "請再說一次。", 0, "店員在問味道。如果真的沒聽懂，這句很好用。"]]],
+  ["ありがとうございました！", "arigatō gozaimashita!", "謝謝光臨！", [
+    ["ごちそうさまでした。おいしかったです！", "gochisōsama deshita. oishikatta desu!", "謝謝招待，很好吃！", 1, "吃完說「ごちそうさまでした」，店員會很開心。"],
+    ["いただきます！", "itadakimasu!", "我開動了！", 0, "這是吃飯前說的。"],
+    ["いらっしゃいませ！", "irasshaimase!", "歡迎光臨！", 0, "這是店員說的話。"]]]
+ ]},
+ { id: "matsui", day: "DAY 3 · 12/16", stamp: "松", title: "松井學校文化交流", place: "京田邊市立松井學校", npc: "日本同學 けんた", av: "け", turns: [
+  ["ぼくは けんた。何年生？", "boku wa Kenta. nannensei?", "我是健太。你幾年級？", [
+    ["五年生です。", "gonensei desu.", "我五年級。", 1, "「年生」是年級。依你自己的年級說喔。"],
+    ["五日間です。", "itsukakan desu.", "五天。", 0, "「日間」是天數。"],
+    ["五人です。", "gonin desu.", "五個人。", 0, "「人」是人數。"]]],
+  ["好きな食べ物は何？", "suki na tabemono wa nani?", "你喜歡吃什麼？", [
+    ["{food}が好きです。", "{food_ro} ga suki desu.", "我喜歡{food_zh}。", 1, "「○○が好きです」可以介紹很多喜好。"],
+    ["{food}をください。", "{food_ro} o kudasai.", "請給我{food_zh}。", 0, "這是點餐用的，對方在問你喜歡什麼。"],
+    ["{food}はいくらですか？", "{food_ro} wa ikura desu ka?", "{food_zh}多少錢？", 0, "這是問價錢的。"]]],
+  ["しゅみは何？", "shumi wa nani?", "你的興趣是什麼？", [
+    ["しゅみは{hobby}です。", "shumi wa {hobby_ro} desu.", "我的興趣是{hobby_zh}。", 1, "「しゅみは○○です」用來介紹興趣。"],
+    ["六時です。", "rokuji desu.", "六點。", 0, "這是在說時間。"],
+    ["はじめまして。", "hajimemashite.", "初次見面。", 0, "你們已經自我介紹過了。"]]],
+  ["いいね！今度いっしょにやろう！", "ii ne! kondo issho ni yarō!", "不錯耶！下次一起玩吧！", [
+    ["うん、やろう！", "un, yarō!", "好啊，一起玩！", 1, "同學之間可以用比較輕鬆的說法。"],
+    ["いいえ、ありません。", "iie, arimasen.", "不，沒有。", 0, "對方在邀請你，不是問有沒有。"],
+    ["お会計をお願いします。", "okaikei o onegaishimasu.", "請結帳。", 0, "這是在餐廳結帳用的。"]]],
+  ["台湾で人気の食べ物は？", "Taiwan de ninki no tabemono wa?", "台灣受歡迎的食物是什麼？", [
+    ["タピオカミルクティーです！", "tapioka mirukutī desu!", "珍珠奶茶！", 1, "珍珠奶茶在日本也很紅，對方一定聽過。"],
+    ["京都です。", "Kyōto desu.", "是京都。", 0, "京都是地名，不是台灣的食物。"],
+    ["わかりません。", "wakarimasen.", "不知道。", 0, "介紹自己的家鄉是交流的好機會，想一個吧！"]]],
+  ["折り紙、やったことある？", "origami, yatta koto aru?", "你折過紙嗎？", [
+    ["少しあります。教えてください！", "sukoshi arimasu. oshiete kudasai!", "折過一點，請教我！", 1, "請對方教你，是交朋友的好方法。"],
+    ["いりません。", "irimasen.", "我不要。", 0, "太冷淡了，試試看吧。"],
+    ["ごちそうさまでした。", "gochisōsama deshita.", "謝謝招待。", 0, "這是吃完飯說的。"]]],
+  ["わあ、上手だね！", "wā, jōzu da ne!", "哇，你折得很好耶！", [
+    ["ありがとう！けんたくんのおかげです。", "arigatō! Kenta-kun no okage desu.", "謝謝！都是健太教得好。", 1, "被稱讚時道謝，再把功勞分給對方，日本人覺得很得體。"],
+    ["すみません。", "sumimasen.", "對不起。", 0, "被稱讚不用道歉，說謝謝就好。"],
+    ["いいえ、ありません。", "iie, arimasen.", "不，沒有。", 0, "這句用來回答「有沒有」，不是回應稱讚。"]]]
+ ]},
+ { id: "usj", day: "DAY 4 · 12/17", stamp: "遊", title: "環球影城走散了", place: "大阪環球影城", npc: "園區工作人員", av: "員", turns: [
+  ["どうしましたか？大丈夫？", "dō shimashita ka? daijōbu?", "怎麼了？還好嗎？", [
+    ["グループとはぐれました。", "gurūpu to haguremashita.", "我跟團體走散了。", 1, "先說清楚發生什麼事。找穿制服的工作人員最安全。"],
+    ["写真をとってもいいですか？", "shashin o totte mo ii desu ka?", "可以拍照嗎？", 0, "現在要先求助。"],
+    ["大丈夫です、さようなら。", "daijōbu desu, sayōnara.", "沒事，再見。", 0, "走散時不要自己亂走，要請人幫忙。"]]],
+  ["先生の名前はわかりますか？", "sensei no namae wa wakarimasu ka?", "你知道老師的名字嗎？", [
+    ["はい、林先生です。", "hai, Rin-sensei desu.", "知道，是林老師。", 1, "出發前記住帶隊老師的名字（這裡用林老師當例子）。"],
+    ["わかりません。一人で探します。", "wakarimasen. hitori de sagashimasu.", "不知道，我自己去找。", 0, "不要自己去找，留在工作人員身邊。"],
+    ["ピアノをひきます。", "piano o hikimasu.", "我彈鋼琴。", 0, "這是在說樂器。"]]],
+  ["連絡先はありますか？", "renrakusaki wa arimasu ka?", "你有聯絡方式嗎？", [
+    ["はい、このカードに書いてあります。", "hai, kono kādo ni kaite arimasu.", "有，寫在這張卡上。", 1, "緊急聯絡卡要隨身帶著，就是為了這個時候。"],
+    ["いいえ、いりません。", "iie, irimasen.", "不，不需要。", 0, "有聯絡方式，工作人員才能找到老師。"],
+    ["お水をください。", "omizu o kudasai.", "請給我水。", 0, "先回答工作人員的問題。"]]],
+  ["集合場所はどこですか？", "shūgō basho wa doko desu ka?", "集合地點在哪裡？", [
+    ["入口の地球儀の前です。", "iriguchi no chikyūgi no mae desu.", "入口的地球儀前面。", 1, "這裡是例子，真正的集合地點以老師當天公布為準。"],
+    ["台湾です。", "Taiwan desu.", "台灣。", 0, "問的是園區裡的地點。"],
+    ["五年生です。", "gonensei desu.", "我五年級。", 0, "這是在回答年級。"]]],
+  ["先生に連絡しました。ここで待っていてください。", "sensei ni renraku shimashita. koko de matte ite kudasai.", "我聯絡老師了，請在這裡等。", [
+    ["はい、ここで待ちます。ありがとうございます。", "hai, koko de machimasu. arigatō gozaimasu.", "好，我在這裡等。謝謝。", 1, "留在原地等，老師最快找到你。"],
+    ["いいえ、自分で行きます。", "iie, jibun de ikimasu.", "不，我自己去。", 0, "已經聯絡老師了，離開反而會錯過。"],
+    ["いただきます。", "itadakimasu.", "我開動了。", 0, "這是吃飯前說的。"]]]
+ ]},
+ { id: "tenma", day: "DAY 5 · 12/18", stamp: "買", title: "商店街買伴手禮", place: "天神橋筋商店街", npc: "商店店員", av: "店", turns: [
+  ["いらっしゃいませ。", "irasshaimase.", "歡迎光臨。", [
+    ["すみません、これはいくらですか？", "sumimasen, kore wa ikura desu ka?", "不好意思，這個多少錢？", 1, "先說「すみません」引起注意，再問價錢。"],
+    ["いらっしゃいませ。", "irasshaimase.", "歡迎光臨。", 0, "這是店員說的話。"],
+    ["いただきます。", "itadakimasu.", "我開動了。", 0, "這是吃飯前說的。"]]],
+  ["八百円です。", "happyaku en desu.", "八百日圓。", [
+    ["じゃあ、これをください。", "jā, kore o kudasai.", "那請給我這個。", 1, "買之前先想想零用錢和伴手禮預算夠不夠。"],
+    ["八百人ですか？", "happyaku-nin desu ka?", "八百個人嗎？", 0, "「円」是日圓，不是人數。"],
+    ["おいしかったです。", "oishikatta desu.", "很好吃。", 0, "這是吃完的感想。"]]],
+  ["袋はご利用ですか？", "fukuro wa goriyō desu ka?", "需要袋子嗎？", [
+    ["いいえ、大丈夫です。エコバッグがあります。", "iie, daijōbu desu. ekobaggu ga arimasu.", "不用，我有環保袋。", 1, "日本購物袋常要另外付費，自備環保袋最方便。"],
+    ["はい、お願いします。", "hai, onegaishimasu.", "好，麻煩你。", 1, "需要袋子就這樣說，可能要加一點錢。"],
+    ["袋はどこですか？", "fukuro wa doko desu ka?", "袋子在哪裡？", 0, "店員在問你要不要袋子。"]]],
+  ["お支払いは現金ですか？", "oshiharai wa genkin desu ka?", "付現金嗎？", [
+    ["はい、現金でお願いします。", "hai, genkin de onegaishimasu.", "是，付現金。", 1, "商店街的小店常常只收現金。"],
+    ["カードを見せてください。", "kādo o misete kudasai.", "請給我看卡片。", 0, "這是請別人出示卡片。"],
+    ["五日間です。", "itsukakan desu.", "五天。", 0, "這是在回答天數。"]]],
+  ["千円お預かりします。二百円のお返しです。", "sen en oazukari shimasu. nihyaku en no okaeshi desu.", "收您一千日圓，找您兩百日圓。", [
+    ["ありがとうございます！", "arigatō gozaimasu!", "謝謝！", 1, "找零後當面數一下，再收進錢包。"],
+    ["ようこそ。", "yōkoso.", "歡迎。", 0, "這是歡迎客人的話。"],
+    ["すみません、八百円です。", "sumimasen, happyaku en desu.", "不好意思，八百日圓。", 0, "價錢是店員說的，你只要道謝。"]]]
+ ]}
+];
+
+/* English versions. Turn: [NPC 英文, NPC 中文, options]. Option: [英文, 中文, 對/錯, 說明] */
+var EN = {
+ kix: { npc: "入境審查官", av: "審", turns: [
+  ["Hello. May I see your passport, please?", "你好，請出示護照。", [
+    ["Here you are.", "給你。", 1, "把東西交給別人時說 Here you are，自然又有禮貌。"],
+    ["Nice to meet you.", "很高興認識你。", 0, "這是第一次認識朋友時說的。這裡要把護照交出去。"],
+    ["Goodbye.", "再見。", 0, "才剛開始，還不能說再見喔。"]]],
+  ["What is the purpose of your visit?", "你來訪的目的是什麼？", [
+    ["It's a school exchange trip.", "是學校交流旅行。", 1, "purpose 是「目的」。清楚說出目的，審查官就放心了。"],
+    ["Where is the restroom?", "廁所在哪裡？", 0, "審查官在問你來日本做什麼。"],
+    ["It's delicious.", "很好吃。", 0, "這句是稱讚食物，答非所問。"]]],
+  ["How long will you stay in Japan?", "你會在日本待多久？", [
+    ["Five days.", "五天。", 1, "How long 問的是時間多長。12/14 到 12/18，一共五天。"],
+    ["Five people.", "五個人。", 0, "people 是人數，對方問的是多久。"],
+    ["I'm from Taiwan.", "我從台灣來。", 0, "這句很好用，但這裡問的是待多久。"]]],
+  ["Where will you stay?", "你會住在哪裡？", [
+    ["At hotels in Kyoto and Osaka.", "住京都和大阪的飯店。", 1, "前兩晚住京都，後兩晚住大阪。"],
+    ["Where is the station?", "車站在哪裡？", 0, "對方問你住哪裡，不是問路。"],
+    ["I'll take this one.", "我要買這個。", 0, "這是買東西時說的。"]]],
+  ["Welcome to Japan. Enjoy your stay!", "歡迎來到日本，好好玩喔！", [
+    ["Thank you very much!", "非常謝謝！", 1, "對方歡迎你，回一句謝謝就很完美。"],
+    ["You're welcome.", "不客氣。", 0, "別人跟你道謝時才說 You're welcome。"],
+    ["Sorry, I don't understand.", "對不起，我聽不懂。", 0, "對方在歡迎你，回一句謝謝就好。"]]]
+ ]},
+ uji: { npc: "日本同學 Yui", av: "Y", turns: [
+  ["Hi! Nice to meet you. I'm Yui.", "嗨！很高興認識你，我是結衣。", [
+    ["Nice to meet you too. I'm {name_en}.", "我也很高興認識你，我是{name}。", 1, "對方先說 Nice to meet you，回答時加上 too，再說自己的名字。"],
+    ["May I help you?", "需要幫忙嗎？", 0, "這是店員招呼客人的話。"],
+    ["How much is it?", "多少錢？", 0, "這是問價錢的話。"]]],
+  ["Where are you from?", "你從哪裡來？", [
+    ["I'm from Taoyuan, Taiwan.", "我從台灣桃園來。", 1, "說出城市，對方更容易記得你。"],
+    ["I'm staying at a hotel in Kyoto.", "我住在京都的飯店。", 0, "對方問你從哪裡來，不是住哪裡。"],
+    ["For five days.", "五天。", 0, "這是在回答待多久。"]]],
+  ["What instrument do you play today?", "你今天負責什麼樂器？", [
+    ["{inst_en}", "{inst_zh}。", 1, "說樂器時用 I play the + 樂器名稱。"],
+    ["Yes, I do.", "是的。", 0, "對方問 What（什麼），要說出樂器名稱。"],
+    ["Some water, please.", "請給我水。", 0, "這是點餐時說的。"]]],
+  ["Let's play music together!", "我們一起演奏吧！", [
+    ["Sure, let's do it!", "好啊，一起來！", 1, "Let's 是邀請，回答 Sure 表示很樂意。"],
+    ["No, thank you.", "不用了，謝謝。", 0, "這樣拒絕會讓對方很失望，交流時盡量參加。"],
+    ["Help me, please!", "請救救我！", 0, "這是緊急求救用的。"]]],
+  ["Did you have fun today?", "你今天玩得開心嗎？", [
+    ["Yes, I had a lot of fun!", "有，我玩得很開心！", 1, "用 Did 問的問題，用 Yes 或 No 開頭回答。"],
+    ["I have a stomachache.", "我肚子痛。", 0, "如果真的不舒服要告訴老師，但這裡對方在問開不開心。"],
+    ["Let's eat!", "開動吧！", 0, "這是吃飯時說的。"]]],
+  ["This is a present for you. Let's meet again!", "這是送你的禮物。我們再見面吧！", [
+    ["Thank you! See you again!", "謝謝！下次見！", 1, "收到禮物先道謝，再約下次見面。"],
+    ["How much is it?", "多少錢？", 0, "禮物不能問價錢喔。"],
+    ["I don't want it.", "我不要。", 0, "直接拒絕禮物很失禮。"]]]
+ ]},
+ lunch: { npc: "餐廳店員", av: "店", turns: [
+  ["Welcome! How many people?", "歡迎光臨！請問幾位？", [
+    ["Two, please.", "兩位，麻煩你。", 1, "同組兩人一起吃飯。"],
+    ["I'm Taiwanese.", "我是台灣人。", 0, "店員問的是人數。"],
+    ["Goodbye.", "再見。", 0, "才剛進門呢。"]]],
+  ["Would you like something to drink?", "要喝點什麼嗎？", [
+    ["Green tea, please.", "請給我綠茶。", 1, "宇治是有名的茶產地，可以喝喝看這裡的茶。"],
+    ["Check, please.", "請結帳。", 0, "才剛坐下，吃完才結帳。"],
+    ["Where is the restroom?", "廁所在哪裡？", 0, "可以問，但先回答店員的問題。"]]],
+  ["Do you have any food allergies?", "你有食物過敏嗎？", [
+    ["Yes, I'm allergic to shrimp.", "有，我對蝦子過敏。", 1, "有過敏一定要說，也可以請老師幫忙。"],
+    ["No, I don't.", "沒有。", 1, "沒有過敏就這樣回答。"],
+    ["It's delicious.", "很好吃。", 0, "還沒吃到呢，而且店員問的是過敏。"]]],
+  ["Here is your Uji set meal. Enjoy!", "這是宇治定食，請慢用！", [
+    ["Thank you! It looks delicious!", "謝謝！看起來好好吃！", 1, "上菜時道謝就很好。在日本，開動前也可以雙手合十說「いただきます」。"],
+    ["Check, please.", "請結帳。", 0, "才剛上菜，吃完才結帳。"],
+    ["Nice to meet you.", "很高興認識你。", 0, "這是第一次認識人時說的。"]]],
+  ["How is the food?", "味道怎麼樣？", [
+    ["It's very delicious!", "非常好吃！", 1, "delicious 是最常用的稱讚。"],
+    ["I'll take this one.", "我要買這個。", 0, "已經上菜了，店員在問味道。"],
+    ["Could you say that again?", "可以再說一次嗎？", 0, "店員在問味道。如果真的沒聽懂，這句很好用。"]]],
+  ["Thank you for coming!", "謝謝光臨！", [
+    ["Thank you for the meal. It was great!", "謝謝招待，很好吃！", 1, "吃完道謝，店員會很開心。"],
+    ["Welcome!", "歡迎光臨！", 0, "這是店員說的話。"],
+    ["Here you are.", "給你。", 0, "這是把東西交給別人時說的。"]]]
+ ]},
+ matsui: { npc: "日本同學 Kenta", av: "K", turns: [
+  ["I'm Kenta. What grade are you in?", "我是健太。你幾年級？", [
+    ["I'm in fifth grade.", "我五年級。", 1, "grade 是年級。依你自己的年級說喔。"],
+    ["For five days.", "五天。", 0, "這是在回答待多久。"],
+    ["Five people.", "五個人。", 0, "people 是人數。"]]],
+  ["What food do you like?", "你喜歡吃什麼？", [
+    ["I like {food_en}.", "我喜歡{food_zh}。", 1, "I like ... 可以介紹很多喜好。"],
+    ["I'd like {food_en}, please.", "請給我{food_zh}。", 0, "I'd like ..., please 是點餐用的，對方在問你喜歡什麼。"],
+    ["How much is the {food_en}?", "{food_zh}多少錢？", 0, "這是問價錢的。"]]],
+  ["What are your hobbies?", "你的興趣是什麼？", [
+    ["I like {hobby_en}.", "我喜歡{hobby_zh}。", 1, "介紹興趣可以說 I like ... 或 My hobby is ...。"],
+    ["It's six o'clock.", "六點了。", 0, "這是在說時間。"],
+    ["Nice to meet you.", "很高興認識你。", 0, "你們已經自我介紹過了。"]]],
+  ["Cool! Let's do it together next time!", "酷耶！下次一起玩吧！", [
+    ["Sure, let's do it!", "好啊，一起玩！", 1, "同學之間可以用輕鬆的說法。"],
+    ["No, I don't have any.", "不，我沒有。", 0, "對方在邀請你，不是問有沒有。"],
+    ["Check, please.", "請結帳。", 0, "這是在餐廳結帳用的。"]]],
+  ["What food is popular in Taiwan?", "台灣受歡迎的食物是什麼？", [
+    ["Bubble tea!", "珍珠奶茶！", 1, "珍珠奶茶在日本也很紅，對方一定聽過。"],
+    ["Kyoto.", "京都。", 0, "京都是地名，不是台灣的食物。"],
+    ["I don't know.", "我不知道。", 0, "介紹自己的家鄉是交流的好機會，想一個吧！"]]],
+  ["Have you ever done origami?", "你折過紙嗎？", [
+    ["Just a little. Can you teach me?", "一點點。你可以教我嗎？", 1, "請對方教你，是交朋友的好方法。"],
+    ["I don't want it.", "我不要。", 0, "太冷淡了，試試看吧。"],
+    ["Thank you for the meal.", "謝謝招待。", 0, "這是吃完飯說的。"]]],
+  ["Wow, you're really good!", "哇，你折得真好！", [
+    ["Thanks! You're a great teacher.", "謝謝！你很會教。", 1, "被稱讚先道謝，再稱讚對方，日本同學會很開心。"],
+    ["Sorry.", "對不起。", 0, "被稱讚不用道歉，說謝謝就好。"],
+    ["No, I don't.", "不，我沒有。", 0, "這句用來回答問題，不是回應稱讚。"]]]
+ ]},
+ usj: { npc: "園區工作人員", av: "員", turns: [
+  ["Are you OK? What happened?", "你還好嗎？發生什麼事？", [
+    ["I got separated from my group.", "我跟團體走散了。", 1, "先說清楚發生什麼事。找穿制服的工作人員最安全。"],
+    ["Can I take a picture?", "我可以拍照嗎？", 0, "現在要先求助。"],
+    ["I'm fine. Bye!", "我沒事，掰掰！", 0, "走散時不要自己亂走，要請人幫忙。"]]],
+  ["Do you know your teacher's name?", "你知道老師的名字嗎？", [
+    ["Yes. My teacher is Ms. Lin.", "知道，是林老師。", 1, "出發前記住帶隊老師的名字（這裡用林老師當例子）。"],
+    ["No. I'll look for my group by myself.", "不知道，我自己去找。", 0, "不要自己去找，留在工作人員身邊。"],
+    ["I play the trumpet.", "我吹小號。", 0, "這是在說樂器。"]]],
+  ["Do you have a phone number we can call?", "你有可以聯絡的電話嗎？", [
+    ["Yes, it's on this card.", "有，寫在這張卡上。", 1, "緊急聯絡卡要隨身帶著，就是為了這個時候。"],
+    ["No, I don't need it.", "不用，我不需要。", 0, "有聯絡電話，工作人員才能找到老師。"],
+    ["Some water, please.", "請給我水。", 0, "先回答工作人員的問題。"]]],
+  ["Where is your meeting point?", "你們的集合地點在哪裡？", [
+    ["In front of the globe at the entrance.", "入口的地球儀前面。", 1, "這裡是例子，真正的集合地點以老師當天公布為準。"],
+    ["Taiwan.", "台灣。", 0, "問的是園區裡的地點。"],
+    ["I'm in fifth grade.", "我五年級。", 0, "這是在回答年級。"]]],
+  ["I called your teacher. Please wait here.", "我聯絡老師了，請在這裡等。", [
+    ["OK, I'll wait here. Thank you.", "好，我在這裡等。謝謝。", 1, "留在原地等，老師最快找到你。"],
+    ["No, I'll go by myself.", "不，我自己去。", 0, "已經聯絡老師了，離開反而會錯過。"],
+    ["Let's eat!", "開動吧！", 0, "這是吃飯時說的。"]]]
+ ]},
+ tenma: { npc: "商店店員", av: "店", turns: [
+  ["Hello! May I help you?", "你好！需要幫忙嗎？", [
+    ["Excuse me, how much is this?", "不好意思，這個多少錢？", 1, "先說 Excuse me 引起注意，再問價錢。"],
+    ["May I help you?", "需要幫忙嗎？", 0, "這是店員說的話。"],
+    ["Let's eat!", "開動吧！", 0, "這是吃飯時說的。"]]],
+  ["It's 800 yen.", "八百日圓。", [
+    ["OK, I'll take it.", "好，我要買這個。", 1, "買之前先想想零用錢和伴手禮預算夠不夠。"],
+    ["800 people?", "八百個人？", 0, "yen 是日圓，不是人數。"],
+    ["It was delicious.", "很好吃。", 0, "這是吃完的感想。"]]],
+  ["Do you need a bag?", "需要袋子嗎？", [
+    ["No, thanks. I have my own bag.", "不用，謝謝。我有自己的袋子。", 1, "日本購物袋常要另外付費，自備環保袋最方便。"],
+    ["Yes, please.", "要，麻煩你。", 1, "需要袋子就這樣說，可能要加一點錢。"],
+    ["Where is the bag?", "袋子在哪裡？", 0, "店員在問你要不要袋子。"]]],
+  ["Cash or card?", "付現金還是刷卡？", [
+    ["Cash, please.", "付現金。", 1, "商店街的小店常常只收現金。"],
+    ["Please show me your card.", "請給我看你的卡。", 0, "這是請別人出示卡片。"],
+    ["Five days.", "五天。", 0, "這是在回答待多久。"]]],
+  ["Out of 1,000 yen. Here's your change, 200 yen.", "收您一千日圓，找您兩百日圓。", [
+    ["Thank you!", "謝謝！", 1, "找零後當面數一下，再收進錢包。"],
+    ["Welcome!", "歡迎光臨！", 0, "這是歡迎客人的話。"],
+    ["Excuse me, it's 800 yen.", "不好意思，是八百日圓。", 0, "價錢是店員說的，你只要道謝。"]]]
+ ]}
+};
+
+/* 2.5D worlds. Map legend: . floor  P player start  N task NPC  a passer-by ; every other letter is a blocking prop */
+var WORLD = {
+ kix: { task: "找到入境審查官，完成入境審查。", sky: "#CFE3EE", floor: ["#E8E6E1", "#DCD9D2"], wall: ["#B9C7D6", "#A3B3C4"],
+  map: ["BBBB.BBBB.", "....N.....", "..........", "===....===", "..........", ".....a....", "..s.....s.", "p........p", "....P....."],
+  npc: { body: "#2F4A6B", hat: "#22364F", hair: "#2B2220" },
+  amb: { name: "機場人員", nameEn: "Airport staff", body: "#4E7A3E", hat: null, hair: "#3A2A20", ja: "次の方、どうぞ。", en: "Next, please!", zh: "下一位，請。" } },
+ uji: { task: "找到日本同學ゆい，和她一起音樂交流。", sky: "#EADCC5", floor: ["#D9B98C", "#CFAE7F"], wall: ["#F1E4CC", "#E2D2B4"],
+  map: ["KKK...LLL.", "KKK.......", "..........", ".m.m.m.m..", "......N...", "..........", "a.........", ".........p", "....P....."],
+  npc: { body: "#C8463A", skirt: "#2F3A55", hair: "#1F1714", tail: true },
+  amb: { name: "日本老師", nameEn: "Teacher", body: "#6B5B8C", hat: null, hair: "#4A3A30", ja: "ようこそ、南部小学校へ！", en: "Welcome to our school!", zh: "歡迎來到南部小學！" } },
+ lunch: { task: "走到店員旁邊，點餐吃一頓宇治定食。", sky: "#E9DCC4", floor: ["#C9B37E", "#BFA872"], wall: ["#E7D3B0", "#D6BF98"],
+  map: ["QQQQQQ..pp", "......N...", "..........", ".TT....TT.", ".TT....TT.", "..........", ".TT..a.TT.", ".TT....TT.", "....P....."],
+  npc: { body: "#2B2B2B", apron: "#F3EEE4", hair: "#2B2220", band: "#C8463A" },
+  amb: { name: "客人", nameEn: "Customer", body: "#8A6D3B", hat: null, hair: "#555", ja: "ここのお茶、おいしいですよ。", en: "The tea here is really good.", zh: "這裡的茶很好喝喔。" } },
+ matsui: { task: "找到日本同學けんた，聊聊彼此的興趣。", sky: "#DDE7D8", floor: ["#E2CDA6", "#D8C197"], wall: ["#E9EEDC", "#D6DDC6"],
+  map: ["LLLLLL....", "..........", ".d.d.d.d..", "..........", ".d.d.N.d..", "..........", ".d.d.d.d.a", "p.........", "....P....."],
+  npc: { body: "#3C6E9E", hair: "#1F1714" },
+  amb: { name: "日本同學", nameEn: "Classmate", body: "#D98A4E", hat: null, hair: "#2B2220", ja: "折り紙、楽しいよ！", en: "Origami is fun!", zh: "折紙很好玩喔！" } },
+ usj: { task: "你和團體走散了！找到園區工作人員求助。", sky: "#BFDDF2", floor: ["#D6D0C4", "#CAC3B5"], wall: null,
+  map: ["t...GG...t", "....GG....", "..........", "l...N....l", "..........", "ff.a....ff", "..........", "t........t", "....P....."],
+  npc: { body: "#1E73BE", hat: "#155A96", hair: "#2B2220" },
+  amb: { name: "遊客", nameEn: "Visitor", body: "#D9576B", hat: null, hair: "#5A3A2A", ja: "地球儀の前で写真をとろう！", en: "Let's take a photo by the globe!", zh: "我們在地球儀前面拍照吧！" } },
+ tenma: { task: "逛商店街，找到店員買一份伴手禮。", sky: "#F2DFC8", floor: ["#D3C3AA", "#C8B79C"], wall: null,
+  map: ["SSSSS.SSSS", "..........", "o..N....o.", "..........", "..........", "o.....a.o.", "..........", "SSSS.SSSSS", "....P....."],
+  npc: { body: "#2E5E8C", apron: "#E9D8B4", hair: "#3A2A20", band: "#F3EEE4" },
+  amb: { name: "路人", nameEn: "Local", body: "#7A8F4E", hat: null, hair: "#888", ja: "この商店街は日本一長いんですよ。", en: "This is the longest shopping street in Japan!", zh: "這條商店街是日本最長的喔。" } }
+};
+var PLAYER_COLORS = [["#E2A33B", "黃"], ["#4E8FD6", "藍"], ["#D9576B", "紅"], ["#5BA36A", "綠"], ["#8B6BC9", "紫"]];
+
+function $(id) { return document.getElementById(id); }
+function el(t, c, h) { var e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function load(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function keep(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+var REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+var best = load("gp-kouryu-best", {});
+var showZh = load("gp-kouryu-zh", true);
+var LANG = load("gp-kouryu-lang", "ja"); if (LANG !== "en") LANG = "ja";
+var P = load("gp-kouryu-profile", null) || {};
+if (!P.name) P.name = load("gp-kouryu-name", "") || "";
+P.nameRo = P.nameRo || ""; if (P.color == null) P.color = 0;
+["inst", "hobby", "food"].forEach(function (k) { if (!P[k]) P[k] = { sel: "0", zh: "", ja: "", ro: "", en: "" }; if (P[k].en == null) P[k].en = ""; });
+function saveP() { keep("gp-kouryu-profile", P); }
+function bestKey(id) { return LANG === "en" ? "en:" + id : id; }
+
+function pick(k) {
+  var p = P[k], L = LISTS[k].items;
+  if (p.sel === "custom") {
+    var zh = p.zh.trim() || "○○", ja = p.ja.trim() || zh, ro = p.ro.trim() || ja, en = p.en.trim() || zh;
+    return { zh: zh, ja: ja, ro: ro, en: en, custom: true };
+  }
+  var it = L[Number(p.sel)] || L[0];
+  if (k === "inst") return { zh: it[0], ja: it[1], ro: it[2], verb: it[3], en: it[4] };
+  return { zh: it[0], ja: it[1], ro: it[2], en: it[3] };
+}
+function tokens() {
+  var i = pick("inst"), h = pick("hobby"), f = pick("food");
+  var instJa, instRo, instZh;
+  if (i.custom) { instJa = i.ja + "を演奏します"; instRo = i.ro + " o ensō shimasu"; instZh = "我演奏" + i.zh; }
+  else { instJa = i.ja + "を" + i.verb[0]; instRo = i.ro + " o " + i.verb[1]; instZh = "我" + i.verb[2] + i.zh; }
+  var nm = P.name.trim() || "○○";
+  return {
+    name: nm, name_ro: P.nameRo.trim() || nm, name_en: P.nameRo.trim() || nm,
+    inst: instJa, inst_ro: instRo, inst_zh: instZh, inst_en: "I play " + i.en + ".",
+    hobby: h.ja, hobby_ro: h.ro, hobby_zh: h.zh, hobby_en: h.en,
+    food: f.ja, food_ro: f.ro, food_zh: f.zh, food_en: f.en
+  };
+}
+function fill(s) { var T = tokens(); return String(s).replace(/\{(\w+)\}/g, function (m, k) { return T[k] != null ? T[k] : m; }); }
+function view(s) {
+  if (LANG === "en") {
+    var e = EN[s.id];
+    return { npc: e.npc, av: e.av, turns: e.turns.map(function (t) {
+      return { t: t[0], ro: "", zh: t[1], opts: t[2].map(function (o) { return { t: o[0], ro: "", zh: o[1], ok: o[2], fb: o[3] }; }) };
+    }) };
+  }
+  return { npc: s.npc, av: s.av, turns: s.turns.map(function (t) {
+    return { t: t[0], ro: t[1], zh: t[2], opts: t[3].map(function (o) { return { t: o[0], ro: o[1], zh: o[2], ok: o[3], fb: o[4] }; }) };
+  }) };
+}
+
+/* ---------- speech ---------- */
+var synth = ("speechSynthesis" in window && "SpeechSynthesisUtterance" in window) ? window.speechSynthesis : null;
+var voices = [], playing = null;
+function loadV() { try { voices = synth.getVoices() || []; } catch (e) { voices = []; } }
+if (synth) { loadV(); try { synth.addEventListener("voiceschanged", loadV); } catch (e) {} }
+var BADV = /novelty|albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|junior|organ|princess|ralph|trinoids|whisper|zarvox|fred|superstar|wobble|espeak|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley/i;
+function voiceFor(lang) {
+  var pre = lang.slice(0, 2);
+  function sc(v) {
+    var s = 0, n = v.name || "";
+    if (/natural|neural|premium|enhanced|online/i.test(n)) s += 5;
+    if (/google|siri|samantha|ava|allison|aria|jenny|kyoko|o-ren|nanami|keita/i.test(n)) s += 3;
+    if (String(v.lang).replace("_", "-") === lang) s += 2;
+    if (BADV.test(n)) s -= 20;
+    return s;
+  }
+  var list = voices.filter(function (v) { return String(v.lang).toLowerCase().indexOf(pre) === 0; }).sort(function (a, b) { return sc(b) - sc(a); });
+  return list[0] || null;
+}
+function stop() { if (synth) synth.cancel(); if (playing) { playing.classList.remove("playing"); playing = null; } }
+function speak(text, btn) {
+  if (!synth) return;
+  var same = btn && playing === btn; stop(); if (same) return;
+  var lang = LANG === "en" ? "en-US" : "ja-JP";
+  var u = new SpeechSynthesisUtterance(text.replace(/○+/g, LANG === "en" ? ", " : "、"));
+  var v = voiceFor(lang); u.lang = v ? v.lang : lang; if (v) u.voice = v; u.rate = LANG === "en" ? 0.9 : 0.85;
+  if (!v) { $("vnote").hidden = false; $("vnote").textContent = "這個裝置沒有找到" + (LANG === "en" ? "英文" : "日文") + "語音，發音可能不標準。可以在手機或電腦的語音設定下載語音。"; }
+  if (btn) { playing = btn; btn.classList.add("playing"); }
+  u.onend = u.onerror = function () { if (btn && playing === btn) { btn.classList.remove("playing"); playing = null; } };
+  synth.speak(u);
+}
+var SPK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function sayBtn(text) {
+  var b = el("button", "say", SPK + "<span>聽</span>"); b.type = "button"; b.setAttribute("aria-label", "朗讀：" + text);
+  if (!synth) b.hidden = true;
+  b.addEventListener("click", function (e) { e.stopPropagation(); speak(text, b); });
+  return b;
+}
+if (!synth) { $("vnote").hidden = false; $("vnote").textContent = "這個瀏覽器不支援語音朗讀，仍然可以看文字作答。"; }
+
+/* ---------- speaking practice: browser speech recognition + scoring ---------- */
+var SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+var speakOn = SRC ? load("gp-kouryu-speak", true) : false;
+var speakBest = load("gp-kouryu-speak-best", {});
+var rec = null, spoken = [];
+function stopRec() { if (rec) { try { rec.abort(); } catch (e) {} rec = null; } }
+
+/* romaji (Hepburn, with macrons) → hiragana, used as a second spelling to compare against */
+var KANA = { a:"あ",i:"い",u:"う",e:"え",o:"お",ka:"か",ki:"き",ku:"く",ke:"け",ko:"こ",sa:"さ",shi:"し",su:"す",se:"せ",so:"そ",ta:"た",chi:"ち",tsu:"つ",te:"て",to:"と",na:"な",ni:"に",nu:"ぬ",ne:"ね",no:"の",ha:"は",hi:"ひ",fu:"ふ",he:"へ",ho:"ほ",ma:"ま",mi:"み",mu:"む",me:"め",mo:"も",ya:"や",yu:"ゆ",yo:"よ",ra:"ら",ri:"り",ru:"る",re:"れ",ro:"ろ",wa:"わ",wo:"を",ga:"が",gi:"ぎ",gu:"ぐ",ge:"げ",go:"ご",za:"ざ",ji:"じ",zu:"ず",ze:"ぜ",zo:"ぞ",da:"だ",de:"で",do:"ど",ba:"ば",bi:"び",bu:"ぶ",be:"べ",bo:"ぼ",pa:"ぱ",pi:"ぴ",pu:"ぷ",pe:"ぺ",po:"ぽ",
+  kya:"きゃ",kyu:"きゅ",kyo:"きょ",sha:"しゃ",shu:"しゅ",sho:"しょ",cha:"ちゃ",chu:"ちゅ",cho:"ちょ",nya:"にゃ",nyu:"にゅ",nyo:"にょ",hya:"ひゃ",hyu:"ひゅ",hyo:"ひょ",mya:"みゃ",myu:"みゅ",myo:"みょ",rya:"りゃ",ryu:"りゅ",ryo:"りょ",gya:"ぎゃ",gyu:"ぎゅ",gyo:"ぎょ",ja:"じゃ",ju:"じゅ",jo:"じょ",bya:"びゃ",byu:"びゅ",byo:"びょ",pya:"ぴゃ",pyu:"ぴゅ",pyo:"ぴょ",fa:"ふぁ",fi:"ふぃ",fe:"ふぇ",fo:"ふぉ",ti:"てぃ",di:"でぃ" };
+function romajiToKana(s) {
+  s = s.toLowerCase().replace(/ā/g, "aa").replace(/ī/g, "ii").replace(/ū/g, "uu").replace(/ē/g, "ei").replace(/ō/g, "ou").replace(/[^a-z']/g, "");
+  var out = "", i = 0;
+  while (i < s.length) {
+    if (s[i] === "'") { i++; continue; }
+    if (s[i] === "n" && (i + 1 >= s.length || !/[aiueoy]/.test(s[i + 1]))) { out += "ん"; i++; continue; }
+    if (i + 1 < s.length && s[i] === s[i + 1] && !/[aiueon]/.test(s[i])) { out += "っ"; i++; continue; }
+    var hit = false;
+    for (var L = 3; L >= 1; L--) { var k = s.substr(i, L); if (KANA[k]) { out += KANA[k]; i += L; hit = true; break; } }
+    if (!hit) i++;
+  }
+  return out;
+}
+function kataToHira(s) { return s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); }); }
+function normJa(s, strip) {
+  s = String(s).normalize("NFKC");
+  strip.forEach(function (x) { if (x) s = s.split(x).join(""); });
+  return kataToHira(s).replace(/[\s、。，．,.!！?？「」『』・…〜~○ー]/g, "");
+}
+var CONTR = { "i'm": "i am", "it's": "it is", "let's": "let us", "i'll": "i will", "don't": "do not", "you're": "you are", "i'd": "i would", "here's": "here is", "that's": "that is", "can't": "cannot", "what's": "what is", "ok": "okay", "5th": "fifth", "mr": "mister", "ms": "miss" };
+function wordsEn(s, strip) {
+  s = String(s).toLowerCase().replace(/[’‘]/g, "'");
+  strip.forEach(function (x) { if (x) s = s.split(x.toLowerCase()).join(" "); });
+  return s.replace(/[^a-z0-9' ]/g, " ").split(/\s+/).filter(Boolean).map(function (w) { return CONTR[w] || w; }).join(" ").split(" ").filter(Boolean);
+}
+function lcs(a, b) {
+  var m = a.length, n = b.length, d = [], i, j;
+  for (i = 0; i <= m; i++) { d.push(new Array(n + 1).fill(0)); }
+  for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) d[i][j] = a[i - 1] === b[j - 1] ? d[i - 1][j - 1] + 1 : Math.max(d[i - 1][j], d[i][j - 1]);
+  var keep = new Array(m).fill(false); i = m; j = n;
+  while (i && j) { if (a[i - 1] === b[j - 1]) { keep[i - 1] = true; i--; j--; } else if (d[i - 1][j] >= d[i][j - 1]) i--; else j--; }
+  return { len: d[m][n], keep: keep };
+}
+/* returns {score 0-100, missing: [words]} for one heard transcript */
+function grade(target, ro, heard) {
+  var T = tokens(), strip = [T.name, T.name_ro, T.name_en].filter(function (x) { return x && x !== "○○"; });
+  if (LANG === "en") {
+    var tw = wordsEn(target, strip), hw = wordsEn(heard, strip);
+    if (!tw.length) return { score: 100, missing: [] };
+    var r = lcs(tw, hw), rc = r.len / tw.length, pr = hw.length ? r.len / hw.length : 0;
+    return { score: Math.round(100 * (.75 * rc + .25 * pr)), missing: tw.filter(function (w, k) { return !r.keep[k]; }) };
+  }
+  var h = normJa(heard, strip), best = { score: 0, missing: [] };
+  var stripKana = strip.map(function (x) { return /[a-z]/i.test(x) ? romajiToKana(x) : x; });
+  [normJa(target, strip), normJa(romajiToKana(ro || ""), stripKana)].forEach(function (t) {
+    if (!t) return;
+    var r = lcs(t.split(""), h.split("")), rc = r.len / t.length, pr = h.length ? r.len / h.length : 0;
+    var sc = Math.round(100 * (.75 * rc + .25 * pr));
+    if (sc > best.score) best = { score: sc, missing: [] };
+  });
+  return best;
+}
+var MIC = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function speakCard(o, turnIndex) {
+  var target = fill(o.t), ro = o.ro ? fill(o.ro) : "";
+  var card = el("div", "mic-card");
+  card.appendChild(el("div", "mc-h", "<b>說說看</b><span>按麥克風，念出你剛剛選的句子</span>"));
+  card.appendChild(el("div", "mc-t", esc(target) + (ro ? '<span class="ro">' + esc(ro) + "</span>" : "")));
+  var row = el("div", "mc-row");
+  var btn = el("button", "mic", MIC + "<span>開始說</span>"); btn.type = "button";
+  var st = el("p", "mc-st", "");
+  row.appendChild(btn); row.appendChild(st); card.appendChild(row);
+  var res = el("div", "mc-res"); res.hidden = true; card.appendChild(res);
+  btn.addEventListener("click", function () {
+    if (rec) { try { rec.stop(); } catch (e) {} return; }
+    stop();
+    var r = new SRC(); rec = r;
+    r.lang = LANG === "en" ? "en-US" : "ja-JP"; r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
+    var finalTexts = [], gotFinal = false;
+    btn.classList.add("rec"); btn.lastChild.textContent = "說完按這裡"; st.textContent = "正在聽…";
+    r.onresult = function (e) {
+      var res0 = e.results[e.results.length - 1];
+      st.textContent = "聽到：" + res0[0].transcript;
+      if (res0.isFinal) { gotFinal = true; finalTexts = []; for (var k = 0; k < res0.length; k++) finalTexts.push(res0[k].transcript); }
+    };
+    r.onerror = function (e) {
+      var m = { "not-allowed": "麥克風沒有開放。請在瀏覽器網址列旁的設定允許使用麥克風，再按一次。", "service-not-allowed": "麥克風沒有開放。請在瀏覽器設定允許使用麥克風。", "no-speech": "沒有聽到聲音，靠近麥克風再說一次。", "audio-capture": "找不到麥克風，請確認裝置有麥克風。", "network": "語音辨識需要網路，請確認連線後再試。", "aborted": "" };
+      st.textContent = m[e.error] != null ? m[e.error] : "辨識失敗，請再試一次。";
+    };
+    r.onend = function () {
+      if (rec === r) rec = null;
+      btn.classList.remove("rec"); btn.lastChild.textContent = "再說一次";
+      if (!gotFinal) { if (!st.textContent || st.textContent === "正在聽…") st.textContent = "沒有聽到聲音，靠近麥克風再說一次。"; return; }
+      var bestG = null, bestText = "";
+      finalTexts.forEach(function (t) { var g = grade(target, ro, t); if (!bestG || g.score > bestG.score) { bestG = g; bestText = t; } });
+      spoken[turnIndex] = Math.max(spoken[turnIndex] || 0, bestG.score);
+      var lv = bestG.score >= 85 ? ["great", "很棒！說得很清楚。"] : bestG.score >= 60 ? ["ok", "不錯！有幾個地方可以再清楚一點。"] : ["low", "再試一次，可以先按「聽」跟著念。"];
+      res.hidden = false; res.className = "mc-res " + lv[0];
+      res.innerHTML = '<div class="mc-score"><b>' + bestG.score + '</b><small>分</small></div><div class="mc-fb"><b>' + lv[1] + "</b><span>電腦聽到：" + esc(bestText) + "</span>" +
+        (bestG.missing.length ? "<span>可能沒說清楚：" + esc(bestG.missing.join("、")) + "</span>" : "") + "</div>";
+      st.textContent = "";
+    };
+    try { r.start(); } catch (e) { rec = null; btn.classList.remove("rec"); st.textContent = "無法開始錄音，請再按一次。"; }
+  });
+  return card;
+}
+
+/* ---------- home ---------- */
+function syncLang() {
+  [].forEach.call(document.querySelectorAll("#langSeg button"), function (b) { b.setAttribute("aria-pressed", b.dataset.lang === LANG ? "true" : "false"); });
+  $("nameRoLabel").textContent = LANG === "en" ? "英文名字（自我介紹時用）" : "名字的念法（羅馬拼音）";
+  $("pnamero").placeholder = LANG === "en" ? "例如：Alex Wang" : "例如：Wang Xiaoming";
+  $("howtoMode").textContent = LANG === "en" ? "把「中文翻譯」關掉，只看英文作答。" : "把「中文翻譯」關掉，只看日文和拼音作答。";
+  renderPreview(); renderHome();
+}
+[].forEach.call(document.querySelectorAll("#langSeg button"), function (b) {
+  b.addEventListener("click", function () { LANG = b.dataset.lang; keep("gp-kouryu-lang", LANG); stop(); syncLang(); });
+});
+function buildPicks() {
+  var box = $("picks"); box.innerHTML = "";
+  Object.keys(LISTS).forEach(function (k) {
+    var L = LISTS[k], p = P[k];
+    var w = el("div", "fld");
+    var lab = el("label", "flab", esc(L.label)); lab.htmlFor = "sel-" + k; w.appendChild(lab);
+    var sel = document.createElement("select"); sel.id = "sel-" + k;
+    L.items.forEach(function (it, i) {
+      var en = k === "inst" ? it[4].replace(/^the /, "") : it[3];
+      var o = document.createElement("option"); o.value = String(i); o.textContent = it[0] + "（" + it[1] + " / " + en + "）"; sel.appendChild(o);
+    });
+    var oc = document.createElement("option"); oc.value = "custom"; oc.textContent = "自己輸入…"; sel.appendChild(oc);
+    sel.value = p.sel; if (sel.value !== p.sel) { sel.value = "0"; p.sel = "0"; }
+    w.appendChild(sel);
+    var cu = el("div", "custom"); cu.hidden = p.sel !== "custom";
+    [["zh", "中文，例如：鐵琴"], ["ja", "日文寫法（不會可留空）"], ["ro", "羅馬拼音（不會可留空）"], ["en", k === "inst" ? "英文，例如：the glockenspiel" : "英文（不會可留空）"]].forEach(function (f) {
+      var inp = document.createElement("input"); inp.type = "text"; inp.id = "c-" + k + "-" + f[0]; inp.placeholder = f[1]; inp.value = p[f[0]] || "";
+      inp.setAttribute("aria-label", L.label + " " + f[1]);
+      inp.addEventListener("input", function () { p[f[0]] = inp.value; saveP(); renderPreview(); });
+      cu.appendChild(inp);
+    });
+    cu.appendChild(el("small", "", "日文、拼音、英文不會寫可以請老師幫忙；留空時會先用中文顯示。"));
+    w.appendChild(cu);
+    sel.addEventListener("change", function () { p.sel = sel.value; cu.hidden = p.sel !== "custom"; saveP(); renderPreview(); });
+    box.appendChild(w);
+  });
+  var cw = $("colors"); cw.innerHTML = "";
+  PLAYER_COLORS.forEach(function (c, i) {
+    var b = el("button", "swatch"); b.type = "button"; b.style.setProperty("--c", c[0]);
+    b.setAttribute("aria-label", c[1] + "色衣服"); b.setAttribute("aria-pressed", P.color === i ? "true" : "false");
+    b.addEventListener("click", function () { P.color = i; saveP(); [].forEach.call(cw.children, function (x, j) { x.setAttribute("aria-pressed", j === i ? "true" : "false"); }); drawAvatar(); });
+    cw.appendChild(b);
+  });
+  drawAvatar();
+}
+function drawAvatar() {
+  var c = $("avatar"), dpr = window.devicePixelRatio || 1; c.width = 64 * dpr; c.height = 72 * dpr;
+  var x = c.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, 64, 72);
+  drawPerson(x, 32, 66, { body: PLAYER_COLORS[P.color][0], hair: "#2B2220" }, 0, false, 1.15);
+}
+function renderPreview() {
+  var T = tokens();
+  if (LANG === "en") $("preview").innerHTML = "<span>對話裡你會這樣說：</span><b lang=\"en\">" + esc(T.inst_en) + " I like " + esc(T.food_en) + ". I like " + esc(T.hobby_en) + ".</b>";
+  else $("preview").innerHTML = "<span>對話裡你會這樣說：</span><b lang=\"ja\">" + esc(T.inst) + "。" + esc(T.food) + "が好きです。しゅみは" + esc(T.hobby) + "です。</b>" +
+    '<span class="r">' + esc(T.inst_ro) + ". " + esc(T.food_ro) + " ga suki desu. shumi wa " + esc(T.hobby_ro) + " desu.</span>";
+}
+$("pname").value = P.name; $("pnamero").value = P.nameRo;
+$("pname").addEventListener("input", function () { P.name = this.value; saveP(); renderPreview(); });
+$("pnamero").addEventListener("input", function () { P.nameRo = this.value; saveP(); renderPreview(); });
+function syncZh() { var t = $("zhToggle"); t.setAttribute("aria-pressed", showZh ? "true" : "false"); t.textContent = showZh ? "中文翻譯：開" : "中文翻譯：關（挑戰）"; }
+$("zhToggle").addEventListener("click", function () { showZh = !showZh; keep("gp-kouryu-zh", showZh); syncZh(); });
+function starStr(n) { var s = ""; for (var i = 0; i < 3; i++) s += i < n ? "★" : "☆"; return s; }
+function renderHome() {
+  var box = $("scenes"); box.innerHTML = ""; var got = 0;
+  SCENES.forEach(function (s, i) {
+    var st = best[bestKey(s.id)] || 0; if (st) got++;
+    var v = view(s);
+    var b = el("button", "scene"); b.type = "button";
+    b.innerHTML = '<div class="txt"><span class="day">' + s.day + "</span><h3>" + esc(s.title) + '</h3><span class="who">對話對象：' + esc(v.npc) + '</span></div><div class="slot' + (st ? " got" : "") + '" aria-label="' + (st ? "已蓋章" : "未蓋章") + '">' + (st ? s.stamp : "印") + '</div><div class="stars">' + (st ? starStr(st) : "尚未挑戰") + (speakBest[bestKey(s.id)] ? " · 口說 " + speakBest[bestKey(s.id)] + " 分" : "") + "</div>";
+    b.addEventListener("click", function () { enter(i); });
+    box.appendChild(b);
+  });
+  $("ppTitle").textContent = LANG === "en" ? "交流護照 · English" : "交流護照 · 日本語";
+  $("ppCount").textContent = "已蓋章 " + got + " / " + SCENES.length;
+}
+
+/* ---------- 2.5D world ---------- */
+var TW = 64, TH = 32;
+var cv = $("world"), ctx = cv.getContext("2d");
+var G = null; /* current game state */
+var keys = {}, pad = { x: 0, y: 0 }, raf = 0, lastT = 0;
+
+function iso(x, y) { return [(x - y) * TW / 2, (x + y) * TH / 2]; }
+function enter(i) {
+  var s = SCENES[i], w = WORLD[s.id], map = w.map, npcs = [], start = [4.5, 8.5];
+  var H = map.length, W = map[0].length, solid = [];
+  for (var y = 0; y < H; y++) { solid.push([]); for (var x = 0; x < W; x++) {
+    var ch = map[y][x];
+    if (ch === "P") start = [x + .5, y + .5];
+    if (ch === "N") npcs.push({ main: true, x: x + .5, y: y + .5 });
+    if (ch === "a") npcs.push({ main: false, x: x + .5, y: y + .5 });
+    solid[y].push(ch !== "." && ch !== "P");
+  } }
+  G = { map: map, i: i, s: s, w: w, W: W, H: H, solid: solid, npcs: npcs, px: start[0], py: start[1], back: false, walk: 0,
+        target: null, talkTo: null, cam: null, bubble: null, near: null, open: false, done: !!best[bestKey(s.id)], t: 0 };
+  $("home").hidden = true; $("play").hidden = false;
+  $("tbTitle").textContent = s.title + (LANG === "en" ? "（英文）" : "（日文）");
+  $("tbPlace").textContent = s.day + " · " + s.place;
+  $("task").innerHTML = "<b>任務</b>" + esc(w.task);
+  closeSheet(true);
+  window.scrollTo(0, 0); resize();
+  cancelAnimationFrame(raf); lastT = performance.now(); raf = requestAnimationFrame(loop);
+  cv.focus({ preventScroll: true });
+}
+function leave() { stop(); cancelAnimationFrame(raf); G = null; closeSheet(true); $("play").hidden = true; $("home").hidden = false; renderHome(); window.scrollTo(0, 0); }
+$("back").addEventListener("click", leave);
+
+var zoom = 1;
+function resize() {
+  var r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  zoom = Math.max(.72, Math.min(1.35, r.width / 620));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", function () { if (G) resize(); });
+
+function blocked(x, y) {
+  var r = .28;
+  if (x < r || y < r || x > G.W - r || y > G.H - r) return true;
+  var pts = [[x - r, y - r], [x + r, y - r], [x - r, y + r], [x + r, y + r]];
+  for (var k = 0; k < 4; k++) { var cx = Math.floor(pts[k][0]), cy = Math.floor(pts[k][1]); if (G.solid[cy] && G.solid[cy][cx]) return true; }
+  for (var n = 0; n < G.npcs.length; n++) { var q = G.npcs[n]; if (Math.hypot(q.x - x, q.y - y) < .62) return true; }
+  return false;
+}
+var DIRS = { ArrowUp: [-1, -1], KeyW: [-1, -1], ArrowDown: [1, 1], KeyS: [1, 1], ArrowLeft: [-1, 1], KeyA: [-1, 1], ArrowRight: [1, -1], KeyD: [1, -1] };
+document.addEventListener("keydown", function (e) {
+  if (!G || G.open) { if (G && G.open && e.key === "Escape") closeSheet(); return; }
+  if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (DIRS[e.code]) { keys[e.code] = 1; G.target = null; G.talkTo = null; e.preventDefault(); }
+  if (e.code === "Space" || e.code === "Enter") { if (G.near) { e.preventDefault(); interact(G.near); } }
+});
+document.addEventListener("keyup", function (e) { delete keys[e.code]; });
+window.addEventListener("blur", function () { keys = {}; pad = { x: 0, y: 0 }; });
+
+[].forEach.call(document.querySelectorAll(".dpad button"), function (b) {
+  var d = b.dataset.d.split(",").map(Number);
+  function on(e) { e.preventDefault(); pad = { x: d[0], y: d[1] }; if (G) { G.target = null; G.talkTo = null; } b.classList.add("on"); }
+  function off() { pad = { x: 0, y: 0 }; b.classList.remove("on"); }
+  b.addEventListener("pointerdown", on); b.addEventListener("pointerup", off); b.addEventListener("pointerleave", off); b.addEventListener("pointercancel", off);
+});
+$("talkBtn").addEventListener("click", function () { if (G && G.near) interact(G.near); });
+
+function camOrigin() {
+  var r = cv.getBoundingClientRect(), p = iso(G.px, G.py);
+  var want = [r.width / 2 / zoom - p[0], r.height * .56 / zoom - p[1]];
+  if (!G.cam) G.cam = want;
+  return G.cam;
+}
+cv.addEventListener("pointerdown", function (e) {
+  if (!G || G.open || !G.cam) return;
+  var r = cv.getBoundingClientRect(), sx = (e.clientX - r.left) / zoom - G.cam[0], sy = (e.clientY - r.top) / zoom - G.cam[1];
+  for (var n = 0; n < G.npcs.length; n++) {
+    var q = G.npcs[n], p = iso(q.x, q.y);
+    if (Math.abs(sx - p[0]) < 18 && sy < p[1] + 6 && sy > p[1] - 64) { G.talkTo = q; G.target = [q.x, q.y]; return; }
+  }
+  var x = (sx / (TW / 2) + sy / (TH / 2)) / 2, y = (sy / (TH / 2) - sx / (TW / 2)) / 2;
+  G.talkTo = null; G.target = [x, y]; G.tap = { x: x, y: y, t: 0 };
+});
+
+function loop(now) {
+  if (!G) return;
+  var dt = Math.min(.05, (now - lastT) / 1000); lastT = now; G.t += dt;
+  if (!G.open) update(dt);
+  draw();
+  raf = requestAnimationFrame(loop);
+}
+function update(dt) {
+  var dx = 0, dy = 0;
+  Object.keys(keys).forEach(function (k) { var d = DIRS[k]; if (d) { dx += d[0]; dy += d[1]; } });
+  dx += pad.x; dy += pad.y;
+  if (!dx && !dy && G.target) {
+    var tx = G.target[0] - G.px, ty = G.target[1] - G.py, dist = Math.hypot(tx, ty);
+    var stopAt = G.talkTo ? 1.15 : .08;
+    if (dist <= stopAt) { G.target = null; if (G.talkTo) { var q = G.talkTo; G.talkTo = null; interact(q); } }
+    else { dx = tx / dist; dy = ty / dist; }
+  }
+  var len = Math.hypot(dx, dy), moving = false;
+  if (len) {
+    var sp = 3 * dt; dx = dx / len * sp; dy = dy / len * sp;
+    var nx = G.px + dx, ny = G.py + dy;
+    if (!blocked(nx, G.py)) { G.px = nx; moving = true; }
+    if (!blocked(G.px, ny)) { G.py = ny; moving = true; }
+    if (!moving && G.target && !G.talkTo) G.target = null;
+    G.back = dx + dy < -.0001; G.flip = dx - dy < 0;
+  }
+  G.walk = moving ? G.walk + dt * 10 : 0;
+  /* nearest NPC within reach */
+  var near = null, bestD = 1.6;
+  G.npcs.forEach(function (q) { var d = Math.hypot(q.x - G.px, q.y - G.py); if (d < bestD) { bestD = d; near = q; } });
+  if (near !== G.near) { G.near = near; syncPrompt(); }
+  if (G.bubble && G.t > G.bubble.until) G.bubble = null;
+}
+function npcName(q) {
+  if (q.main) return view(G.s).npc;
+  return LANG === "en" ? G.w.amb.nameEn : G.w.amb.name;
+}
+function syncPrompt() {
+  var b = $("talkBtn");
+  if (!G.near) { b.hidden = true; return; }
+  b.hidden = false;
+  b.innerHTML = (G.near.main ? "和 " + esc(npcName(G.near)) + " 對話" : "聽聽 " + esc(npcName(G.near)) + " 說什麼") + '<small>空白鍵</small>';
+}
+function interact(q) {
+  if (q.main) { openSheet(); return; }
+  var a = G.w.amb, line = LANG === "en" ? a.en : a.ja;
+  G.bubble = { q: q, text: line, zh: a.zh, until: G.t + 4.5 };
+  speak(line);
+}
+
+/* ---------- drawing ---------- */
+function poly(pts, fill) { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); }
+function shade(hex, f) {
+  var n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255;
+  function c(v) { return Math.max(0, Math.min(255, Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f))); }
+  return "rgb(" + c(r) + "," + c(g) + "," + c(b) + ")";
+}
+function box(cx, cy, h, col, o) {
+  o = o || {}; var ins = o.inset || 0, lift = o.lift || 0, w = o.w || 1, d = o.d || 1;
+  var x0 = cx + ins, y0 = cy + ins, x1 = cx + w - ins, y1 = cy + d - ins;
+  var A = iso(x0, y0), B = iso(x1, y0), C = iso(x1, y1), D = iso(x0, y1);
+  function up(p, z) { return [p[0], p[1] - z]; }
+  poly([up(D, lift), up(C, lift), up(C, lift + h), up(D, lift + h)], o.left || shade(col, -.22));
+  poly([up(B, lift), up(C, lift), up(C, lift + h), up(B, lift + h)], o.right || shade(col, -.38));
+  poly([up(A, lift + h), up(B, lift + h), up(C, lift + h), up(D, lift + h)], o.top || col);
+}
+function ball(x, y, z, r, col) { var p = iso(x, y); ctx.beginPath(); ctx.arc(p[0], p[1] - z, r, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill(); }
+function prop(ch, cx, cy) {
+  switch (ch) {
+    case "B": box(cx, cy, 58, "#A3B1C6"); box(cx, cy, 4, "#3F5876", { lift: 58, inset: .06 }); break;
+    case "=": box(cx, cy, 24, "#C9A227", { inset: .43 });
+      var a = iso(cx + .5, cy + .5), b = iso(cx + 1.5, cy + .5); ctx.strokeStyle = "#B8452F"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(a[0], a[1] - 20); ctx.lineTo(b[0], b[1] - 20); ctx.stroke(); break;
+    case "s": box(cx, cy, 24, (cx * 7 + cy) % 2 ? "#D9576B" : "#4E8FD6", { inset: .26 }); box(cx, cy, 4, "#3B2F28", { inset: .42, lift: 24 }); break;
+    case "p": box(cx, cy, 14, "#A0623E", { inset: .3 }); ball(cx + .5, cy + .5, 32, 15, "#5E8F45"); ball(cx + .42, cy + .45, 38, 9, "#76A85A"); break;
+    case "K": box(cx, cy, 30, "#2A2A2E"); if (G.map[cy][cx - 1] !== "K" && G.map[cy - 1] && G.map[cy - 1][cx] === "K") box(cx, cy, 4, "#F3EEE4", { lift: 30, inset: .1 }); break;
+    case "m": box(cx, cy, 30, "#5A5A60", { inset: .46 }); box(cx, cy, 5, "#2F2F33", { inset: .28, lift: 30 }); break;
+    case "Q": box(cx, cy, 34, "#C79A62"); break;
+    case "T": box(cx, cy, 20, "#B5835A", { inset: .06 }); if ((cx + cy) % 2) ball(cx + .5, cy + .5, 26, 5, "#F3EEE4"); break;
+    case "L": box(cx, cy, 72, "#3E5B4A"); break;
+    case "d": box(cx, cy, 22, "#E2C28F", { inset: .12 }); break;
+    case "G":
+      if (G.map[cy][cx - 1] === "G" || (G.map[cy - 1] && G.map[cy - 1][cx] === "G")) break;
+      box(cx, cy, 30, "#B8B2A6", { inset: .35, w: 2, d: 2 });
+      var gp = iso(cx + 1, cy + 1), gr = ctx.createRadialGradient(gp[0] - 12, gp[1] - 92, 6, gp[0], gp[1] - 78, 46);
+      gr.addColorStop(0, "#9DD0F2"); gr.addColorStop(1, "#1E5E9E");
+      ctx.beginPath(); ctx.arc(gp[0], gp[1] - 78, 44, 0, Math.PI * 2); ctx.fillStyle = gr; ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 2;
+      for (var k = -1; k <= 1; k++) { ctx.beginPath(); ctx.ellipse(gp[0], gp[1] - 78 + k * 20, 44 * Math.cos(k * .48), 7, 0, 0, Math.PI * 2); ctx.stroke(); }
+      ctx.beginPath(); ctx.ellipse(gp[0], gp[1] - 78, 16, 44, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = "#D8C27A"; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(gp[0], gp[1] - 78, 54, 15, -.35, 0, Math.PI * 2); ctx.stroke();
+      break;
+    case "l": box(cx, cy, 64, "#3B3B3B", { inset: .46 }); ball(cx + .5, cy + .5, 70, 9, "#FFE6A3"); break;
+    case "f": box(cx, cy, 10, "#5C8A3A", { inset: .04 }); ball(cx + .3, cy + .4, 13, 4, "#F2B8C0"); ball(cx + .65, cy + .6, 13, 4, "#F0D35A"); ball(cx + .5, cy + .2, 13, 4, "#FFFFFF"); break;
+    case "t": box(cx, cy, 28, "#7A5440", { inset: .42 }); ball(cx + .5, cy + .5, 46, 24, "#4E7A3E"); ball(cx + .45, cy + .45, 60, 16, "#6A9A50"); break;
+    case "S": box(cx, cy, 38, "#E9D8B4"); box(cx, cy, 6, (cx % 2) ? "#C8463A" : "#F3EEE4", { lift: 50, inset: -.04 });
+      box(cx, cy, 12, ["#F0B9A0", "#EDB02C", "#9DB48B"][(cx + cy) % 3], { lift: 38, inset: .2 }); break;
+    case "o": box(cx, cy, 58, "#3B2F28", { inset: .46 });
+      var lp = iso(cx + .5, cy + .5); ctx.fillStyle = "#C8463A"; roundRect(lp[0] - 9, lp[1] - 86, 18, 24, 8); ctx.fill();
+      ctx.fillStyle = "#3B2F28"; ctx.fillRect(lp[0] - 7, lp[1] - 87, 14, 3); ctx.fillRect(lp[0] - 7, lp[1] - 64, 14, 3); break;
+  }
+}
+function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+/* a chibi person standing at screen point (sx, sy) */
+function drawPerson(c, sx, sy, o, walk, back, scale) {
+  var s = scale || 1, sw = Math.sin(walk) * 2.4 * s, bob = walk ? Math.abs(Math.sin(walk)) * 1.6 * s : 0;
+  c.save(); c.translate(sx, sy - bob);
+  c.fillStyle = "rgba(40,25,15,.22)"; c.beginPath(); c.ellipse(0, bob, 13 * s, 5.5 * s, 0, 0, Math.PI * 2); c.fill();
+  c.fillStyle = "#2F2A28"; c.fillRect(-6 * s, -13 * s + sw, 5 * s, 13 * s - sw); c.fillRect(1 * s, -13 * s - sw, 5 * s, 13 * s + sw);
+  if (o.skirt) { c.fillStyle = o.skirt; c.beginPath(); c.moveTo(-10 * s, -10 * s); c.lineTo(10 * s, -10 * s); c.lineTo(8 * s, -20 * s); c.lineTo(-8 * s, -20 * s); c.closePath(); c.fill(); }
+  c.fillStyle = o.body; rr(c, -10 * s, -35 * s, 20 * s, o.skirt ? 17 * s : 23 * s, 6 * s); c.fill();
+  c.fillStyle = shade(o.body, -.18); rr(c, -14 * s, -33 * s - sw * .6, 5 * s, 15 * s, 2.5 * s); c.fill(); rr(c, 9 * s, -33 * s + sw * .6, 5 * s, 15 * s, 2.5 * s); c.fill();
+  if (o.apron && !back) { c.fillStyle = o.apron; rr(c, -7 * s, -29 * s, 14 * s, 17 * s, 3 * s); c.fill(); }
+  c.fillStyle = "#F2C9A0"; c.beginPath(); c.arc(0, -46 * s, 11.5 * s, 0, Math.PI * 2); c.fill();
+  c.fillStyle = o.hair || "#2B2220";
+  if (back) { c.beginPath(); c.arc(0, -47 * s, 12.2 * s, 0, Math.PI * 2); c.fill(); }
+  else { c.beginPath(); c.arc(0, -48 * s, 12.2 * s, Math.PI * 1.02, Math.PI * 1.98); c.lineTo(10 * s, -44 * s); c.quadraticCurveTo(0, -52 * s, -10 * s, -44 * s); c.closePath(); c.fill(); }
+  if (o.tail) { c.beginPath(); c.arc(back ? 0 : 11 * s, -50 * s, 5 * s, 0, Math.PI * 2); c.fill(); }
+  if (o.band) { c.fillStyle = o.band; c.fillRect(-12 * s, -54 * s, 24 * s, 3.5 * s); }
+  if (o.hat) { c.fillStyle = o.hat; rr(c, -11 * s, -60 * s, 22 * s, 9 * s, 4 * s); c.fill(); c.fillRect(back ? -11 * s : -3 * s, -53 * s, 14 * s, 3 * s); }
+  if (!back) {
+    c.fillStyle = "#2B2220"; c.beginPath(); c.arc(-4 * s, -45 * s, 1.7 * s, 0, Math.PI * 2); c.arc(4 * s, -45 * s, 1.7 * s, 0, Math.PI * 2); c.fill();
+    c.fillStyle = "rgba(230,120,120,.45)"; c.beginPath(); c.arc(-7 * s, -41 * s, 2.2 * s, 0, Math.PI * 2); c.arc(7 * s, -41 * s, 2.2 * s, 0, Math.PI * 2); c.fill();
+  }
+  c.restore();
+}
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+
+function label(x, y, text, bg, fg) {
+  ctx.font = '700 12px "Noto Sans TC", "PingFang TC", sans-serif';
+  var w = ctx.measureText(text).width + 14;
+  ctx.fillStyle = bg; roundRect(x - w / 2, y - 18, w, 20, 10); ctx.fill();
+  ctx.fillStyle = fg; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, x, y - 8);
+}
+function speech(x, y, text, sub) {
+  ctx.font = '700 15px "Noto Sans TC", "PingFang TC", sans-serif';
+  var w1 = ctx.measureText(text).width;
+  ctx.font = '400 12px "Noto Sans TC", "PingFang TC", sans-serif';
+  var w2 = sub ? ctx.measureText(sub).width : 0, w = Math.max(w1, w2) + 22, h = sub ? 46 : 30;
+  var maxW = cv.getBoundingClientRect().width / zoom - 16;
+  var bx = Math.max(-G.cam[0] + 8, Math.min(x - w / 2, -G.cam[0] + maxW - w + 8));
+  ctx.fillStyle = "#FFFBF2"; ctx.strokeStyle = "#3B2F28"; ctx.lineWidth = 2;
+  roundRect(bx, y - h - 10, w, h, 12); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x - 6, y - 11); ctx.lineTo(x, y - 2); ctx.lineTo(x + 6, y - 11); ctx.fillStyle = "#FFFBF2"; ctx.fill();
+  ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillStyle = "#3B2F28";
+  ctx.font = '700 15px "Noto Sans TC", "PingFang TC", sans-serif'; ctx.fillText(text, bx + 11, y - h - 10 + 16);
+  if (sub) { ctx.font = '400 12px "Noto Sans TC", "PingFang TC", sans-serif'; ctx.fillStyle = "#6F5F52"; ctx.fillText(sub, bx + 11, y - h - 10 + 34); }
+}
+function draw() {
+  var r = cv.getBoundingClientRect(), w = G.w;
+  ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+  ctx.fillStyle = w.sky; ctx.fillRect(0, 0, r.width, r.height);
+  var p0 = iso(G.px, G.py), want = [r.width / 2 / zoom - p0[0], r.height * .58 / zoom - p0[1]];
+  if (!G.cam) G.cam = want;
+  G.cam[0] += (want[0] - G.cam[0]) * .12; G.cam[1] += (want[1] - G.cam[1]) * .12;
+  ctx.save(); ctx.scale(zoom, zoom); ctx.translate(G.cam[0], G.cam[1]);
+  G.map = w.map;
+  /* floor */
+  for (var y = 0; y < G.H; y++) for (var x = 0; x < G.W; x++) {
+    poly([iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1)], w.floor[(x + y) % 2]);
+  }
+  var A = iso(0, G.H), B = iso(G.W, G.H), C = iso(G.W, 0);
+  poly([A, B, [B[0], B[1] + 14], [A[0], A[1] + 14]], shade(w.floor[0], -.25));
+  poly([B, C, [C[0], C[1] + 14], [B[0], B[1] + 14]], shade(w.floor[0], -.4));
+  if (w.wall) {
+    var o = iso(0, 0), r0 = iso(G.W, 0), l0 = iso(0, G.H), WH = 96;
+    poly([o, r0, [r0[0], r0[1] - WH], [o[0], o[1] - WH]], w.wall[1]);
+    poly([o, l0, [l0[0], l0[1] - WH], [o[0], o[1] - WH]], w.wall[0]);
+    poly([[o[0], o[1] - WH], [r0[0], r0[1] - WH], [r0[0], r0[1] - WH - 6], [o[0], o[1] - WH - 6]], shade(w.wall[1], -.3));
+    poly([[o[0], o[1] - WH], [l0[0], l0[1] - WH], [l0[0], l0[1] - WH - 6], [o[0], o[1] - WH - 6]], shade(w.wall[0], -.3));
+  }
+  if (G.target && !G.talkTo) {
+    var tp = iso(G.target[0], G.target[1]); ctx.strokeStyle = "rgba(127,82,0,.7)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(tp[0], tp[1], 12, 6, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  /* props + people, depth sorted */
+  var items = [];
+  for (y = 0; y < G.H; y++) for (x = 0; x < G.W; x++) {
+    var ch = w.map[y][x];
+    if (ch !== "." && ch !== "P" && ch !== "N" && ch !== "a") items.push({ d: x + y + 1 + (ch === "G" ? 2 : 0), f: prop.bind(null, ch, x, y) });
+  }
+  var pc = PLAYER_COLORS[P.color] ? PLAYER_COLORS[P.color][0] : PLAYER_COLORS[0][0];
+  items.push({ d: G.px + G.py, f: function () { var p = iso(G.px, G.py); drawPerson(ctx, p[0], p[1], { body: pc, hair: "#2B2220" }, REDUCED ? 0 : G.walk, G.back); } });
+  G.npcs.forEach(function (q) {
+    var look = (G.px - q.x) + (G.py - q.y) < -.3;
+    var o = q.main ? w.npc : { body: w.amb.body, hat: w.amb.hat, hair: w.amb.hair };
+    items.push({ d: q.x + q.y, f: function () {
+      var p = iso(q.x, q.y); drawPerson(ctx, p[0], p[1], o, 0, look);
+      label(p[0], p[1] - (o.hat ? 66 : 62), npcName(q), q.main ? "#3B2F28" : "rgba(59,47,40,.72)", "#FFFBF2");
+      if (q.main) {
+        var bob = REDUCED ? 0 : Math.sin(G.t * 4) * 3, my = p[1] - 96 + bob;
+        ctx.fillStyle = G.done ? "#4E7A3E" : "#EDB02C"; ctx.beginPath(); ctx.arc(p[0], my, 11, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#3B2F28"; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = G.done ? "#FFFBF2" : "#3B2F28"; ctx.font = '900 15px "Noto Sans TC", sans-serif'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(G.done ? "✓" : "!", p[0], my + 1);
+      }
+    } });
+  });
+  items.sort(function (a, b) { return a.d - b.d; });
+  items.forEach(function (it) { it.f(); });
+  if (G.bubble) { var bq = G.bubble.q, bp = iso(bq.x, bq.y); speech(bp[0], bp[1] - 84, G.bubble.text, showZh ? G.bubble.zh : ""); }
+  ctx.restore();
+}
+
+/* ---------- dialogue sheet ---------- */
+var V, ti, firstTry, score, marks;
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function LA() { return LANG === "en" ? "en" : "ja"; }
+function openSheet() {
+  G.open = true; keys = {}; pad = { x: 0, y: 0 }; G.target = null;
+  V = view(G.s); ti = 0; score = 0; marks = []; spoken = [];
+  $("sheetName").textContent = V.npc;
+  $("chat").innerHTML = ""; $("result").innerHTML = ""; $("choices").innerHTML = "";
+  $("sheet").hidden = false; $("scrim").hidden = false; $("talkBtn").hidden = true;
+  $("sheetBody").scrollTop = 0;
+  turn();
+  $("closeSheet").focus({ preventScroll: true });
+}
+function closeSheet(silent) {
+  stop(); stopRec(); $("sheet").hidden = true; $("scrim").hidden = true;
+  if (G) { G.open = false; if (!silent) { syncPrompt(); cv.focus({ preventScroll: true }); } }
+}
+$("closeSheet").addEventListener("click", function () { closeSheet(); });
+$("scrim").addEventListener("click", function () { closeSheet(); });
+function dots() {
+  var d = $("dots"); d.innerHTML = "";
+  V.turns.forEach(function (_, i) { d.appendChild(el("i", (marks[i] === 2 ? "ok" : marks[i] === 1 ? "half" : "") + (i === ti && marks[i] == null ? " now" : ""))); });
+}
+function toBottom() { var b = $("sheetBody"); b.scrollTo({ top: b.scrollHeight, behavior: REDUCED ? "auto" : "smooth" }); }
+function npcSays(t) {
+  var row = el("div", "row");
+  row.appendChild(el("div", "av", esc(V.av)));
+  var bub = el("div", "bub", '<span class="ja" lang="' + LA() + '">' + esc(t.t) + "</span>" + (t.ro ? '<span class="ro">' + esc(t.ro) + "</span>" : "") + (showZh ? '<span class="zh">' + esc(t.zh) + "</span>" : ""));
+  var sb = sayBtn(t.t); bub.appendChild(sb);
+  row.appendChild(bub); $("chat").appendChild(row);
+  return sb;
+}
+function meSays(o) {
+  var row = el("div", "row me");
+  row.appendChild(el("div", "av", "我"));
+  var bub = el("div", "bub", '<span class="ja" lang="' + LA() + '">' + esc(fill(o.t)) + "</span>" + (o.ro ? '<span class="ro">' + esc(fill(o.ro)) + "</span>" : "") + (showZh ? '<span class="zh">' + esc(fill(o.zh)) + "</span>" : ""));
+  var mb = sayBtn(fill(o.t)); bub.appendChild(mb);
+  row.appendChild(bub); $("chat").appendChild(row);
+  return mb;
+}
+function note(kind, head, text) { var n = el("div", "note " + kind, "<b>" + head + "</b><span>" + esc(text) + "</span>"); $("chat").appendChild(n); return n; }
+function turn() {
+  firstTry = true; dots();
+  var t = V.turns[ti]; var sb = npcSays(t); speak(t.t, sb);
+  var box = $("choices"); box.innerHTML = "";
+  box.appendChild(el("h3", "", "你要怎麼回答？"));
+  var lastBad = null;
+  shuffle(t.opts).forEach(function (o) {
+    var card = el("div", "opt");
+    var btn = el("button", "pick", '<span class="pja" lang="' + LA() + '">' + esc(fill(o.t)) + "</span>" + (o.ro ? '<span class="ro">' + esc(fill(o.ro)) + "</span>" : "") + (showZh ? '<span class="pzh">' + esc(fill(o.zh)) + "</span>" : "")); btn.type = "button";
+    btn.addEventListener("click", function () {
+      stop();
+      if (o.ok) {
+        if (lastBad) lastBad.remove();
+        var mb = meSays(o); speak(fill(o.t), mb);
+        marks[ti] = firstTry ? 2 : 1; if (firstTry) score++;
+        note("good", firstTry ? "答對了！" : "這次對了！", fill(o.fb));
+        box.innerHTML = "";
+        var nx = el("button", "next", ti < V.turns.length - 1 ? "下一句 →" : "完成任務 →"); nx.type = "button";
+        nx.addEventListener("click", function () { stopRec(); ti++; box.innerHTML = ""; if (ti < V.turns.length) { turn(); toBottom(); } else finish(); });
+        if (speakOn) box.appendChild(speakCard(o, ti)); box.appendChild(nx); dots(); nx.focus({ preventScroll: true }); toBottom();
+      } else {
+        firstTry = false; card.classList.add("wrong"); btn.disabled = true;
+        if (lastBad) lastBad.remove();
+        lastBad = note("bad", "再想想", fill(o.fb));
+        lastBad.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+      }
+    });
+    card.appendChild(btn); card.appendChild(sayBtn(fill(o.t)));
+    box.appendChild(card);
+  });
+}
+function finish() {
+  var n = V.turns.length, st = score === n ? 3 : score >= Math.ceil(n * 0.6) ? 2 : 1, key = bestKey(G.s.id);
+  var first = !best[key];
+  if (st > (best[key] || 0)) { best[key] = st; keep("gp-kouryu-best", best); }
+  G.done = true; dots();
+  var idx = G.i, nextS = SCENES[idx + 1], S = G.s;
+  var r = $("result"); r.innerHTML = "";
+  var card = el("div", "result");
+  card.appendChild(el("div", "big-stamp in", S.stamp + "<small>" + (LANG === "en" ? "EN " : "JA ") + S.day.split(" · ")[1] + "</small>"));
+  card.appendChild(el("h2", "", "任務完成：" + esc(S.title)));
+  card.appendChild(el("div", "sc", starStr(st)));
+  card.appendChild(el("p", "", "第一次就答對 " + score + " / " + n + " 句。" + (st < 3 ? "再和對方說一次話，試試全部一次答對。" : first ? "全部一次答對，你準備好了！" : "又是滿分，太厲害了！")));
+  var said = spoken.filter(function (x) { return x != null; });
+  if (said.length) {
+    var avg = Math.round(said.reduce(function (a, b) { return a + b; }, 0) / said.length);
+    if (avg > (speakBest[key] || 0)) { speakBest[key] = avg; keep("gp-kouryu-speak-best", speakBest); }
+    card.appendChild(el("p", "speak-sum", "口說平均 <b>" + avg + "</b> 分（說了 " + said.length + " / " + n + " 句）"));
+  } else if (speakOn) card.appendChild(el("p", "", "這次沒有練習口說。下次選對後按麥克風說說看！"));
+  var btns = el("div", "btns");
+  var stay = el("button", "", "在場景裡逛逛"); stay.type = "button"; stay.addEventListener("click", function () { closeSheet(); });
+  var home = el("button", nextS ? "" : "primary", "回到選單"); home.type = "button"; home.addEventListener("click", leave);
+  btns.appendChild(stay); btns.appendChild(home);
+  if (nextS) { var nx = el("button", "primary", "下一站：" + nextS.title); nx.type = "button"; nx.addEventListener("click", function () { enter(idx + 1); }); btns.appendChild(nx); }
+  card.appendChild(btns); r.appendChild(card);
+  toBottom();
+}
+
+function syncSpeak() {
+  var t = $("speakToggle");
+  if (!SRC) { t.hidden = true; $("speakNote").textContent = "這個瀏覽器不支援語音辨識，口說練習無法使用。請改用 Chrome、Edge 或 Safari 開啟。"; return; }
+  t.setAttribute("aria-pressed", speakOn ? "true" : "false"); t.textContent = speakOn ? "口說練習：開" : "口說練習：關";
+}
+$("speakToggle").addEventListener("click", function () { speakOn = !speakOn; keep("gp-kouryu-speak", speakOn); syncSpeak(); });
+syncSpeak(); syncZh(); buildPicks(); syncLang();
+})();
+</script>
+
+</body>
+</html>

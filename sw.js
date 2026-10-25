@@ -1,5 +1,7 @@
 /* 離線快取：只快取網頁本身、腳本與字型；資料庫請求一律不快取。 */
-const C = "gp-shell-v1";
+const C = "gp-shell-v2";
+// 每個頁面各自快取：首頁存成 "./"，其他頁面（例如 game.html）用自己的網址
+const pageKey = (u) => (/\/(index\.html)?$/.test(u.pathname) ? "./" : u.origin + u.pathname);
 const PRE = [
   "./",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js",
@@ -21,9 +23,9 @@ self.addEventListener("fetch", (e) => {
   if (r.mode === "navigate" || (sameOrigin && !u.pathname.endsWith("sw.js"))) {
     // 網頁本身：有網路就拿最新的，沒網路用快取
     e.respondWith(fetch(r).then((res) => {
-      if (res && res.ok) { const copy = res.clone(); caches.open(C).then((c) => c.put(r.mode === "navigate" ? "./" : r, copy)); }
+      if (res && res.ok) { const copy = res.clone(); caches.open(C).then((c) => c.put(r.mode === "navigate" ? pageKey(u) : r, copy)); }
       return res;
-    }).catch(() => caches.match(r.mode === "navigate" ? "./" : r, { ignoreSearch: true }).then((m) => m || caches.match("./"))));
+    }).catch(() => caches.match(r.mode === "navigate" ? pageKey(u) : r, { ignoreSearch: true }).then((m) => m || caches.match("./"))));
     return;
   }
   // 腳本與字型：先用快取，背景更新
