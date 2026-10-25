@@ -152,6 +152,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .btns button { border-radius: 999px; padding: 9px 20px; font-weight: 700; cursor: pointer; border: 1px solid var(--line); background: var(--bg); }
 .btns button.primary { background: var(--sign); color: var(--on-sign); border-color: var(--sign); }
 [hidden] { display: none !important; }
+.homelink { color: var(--sign-ink); font-weight: 700; text-decoration: none; margin-right: 12px; }
+.homelink:hover { text-decoration: underline; }
 .tgls { display: flex; flex-wrap: wrap; gap: 8px; }
 .mic-card { border: 2px dashed var(--sign); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; background: var(--surface); }
 .mc-h { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
@@ -208,7 +210,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <div class="wrap">
   <section id="home">
     <header class="hero">
-      <p class="org">公埔國小 · 赴日本國際交流</p>
+      <p class="org"><a class="homelink" href="./">← 回行程網站</a>公埔國小 · 赴日本國際交流</p>
       <h1>日本交流對話任務</h1>
       <p class="lead">先選要練習日文還是英文。走進六個行程場景，操控自己的角色去找審查官、日本同學、店員和工作人員說話。聽懂對方的話，選出最合適的回答，完成任務就能蓋上護照章。</p>
     </header>
