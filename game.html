@@ -801,36 +801,54 @@ function speakCard(o, turnIndex) {
   var st = el("p", "mc-st", "");
   row.appendChild(btn); row.appendChild(st); card.appendChild(row);
   var res = el("div", "mc-res"); res.hidden = true; card.appendChild(res);
+  var showResult = function (texts) {
+    var bestG = null, bestText = "";
+    texts.forEach(function (t) { var g = grade(target, ro, t); if (!bestG || g.score > bestG.score) { bestG = g; bestText = t; } });
+    spoken[turnIndex] = Math.max(spoken[turnIndex] || 0, bestG.score);
+    var lv = bestG.score >= 85 ? ["great", "很棒！說得很清楚。"] : bestG.score >= 60 ? ["ok", "不錯！有幾個地方可以再清楚一點。"] : ["low", "再試一次，可以先按「聽」跟著念。"];
+    res.hidden = false; res.className = "mc-res " + lv[0];
+    res.innerHTML = '<div class="mc-score"><b>' + bestG.score + '</b><small>分</small></div><div class="mc-fb"><b>' + lv[1] + "</b><span>電腦聽到：" + esc(bestText) + "</span>" +
+      (bestG.missing.length ? "<span>可能沒說清楚：" + esc(bestG.missing.join("、")) + "</span>" : "") + "</div>";
+    st.textContent = "";
+    res.scrollIntoView({ block: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+  };
   btn.addEventListener("click", function () {
-    if (rec) { try { rec.stop(); } catch (e) {} return; }
+    if (rec) { if (rec.finish) rec.finish(); return; }
     stop();
     var r = new SRC(); rec = r;
     r.lang = LANG === "en" ? "en-US" : "ja-JP"; r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
-    var finalTexts = [], gotFinal = false;
-    btn.classList.add("rec"); btn.lastChild.textContent = "說完按這裡"; st.textContent = "正在聽…";
+    var heard = [], finalHeard = [], errMsg = "", done = false, guard = 0;
+    btn.classList.add("rec"); btn.lastChild.textContent = "說完按這裡"; st.textContent = "正在聽…請說話"; res.hidden = true;
+    /* grade once: on a final result, when recognition ends, or when the student taps 說完 */
+    function finish() {
+      if (done) return; done = true; clearTimeout(guard);
+      if (rec === r) rec = null;
+      try { r.abort(); } catch (e) {}
+      btn.classList.remove("rec"); btn.lastChild.textContent = "再說一次";
+      var texts = (finalHeard.length ? finalHeard : heard).filter(function (t) { return t && t.trim(); });
+      if (texts.length) showResult(texts);
+      else st.textContent = errMsg || "沒有聽到聲音。靠近麥克風，按「開始說」後再說一次。";
+    }
+    r.finish = function () { st.textContent = "辨識中…"; try { r.stop(); } catch (e) {} clearTimeout(guard); guard = setTimeout(finish, 1500); };
     r.onresult = function (e) {
-      var res0 = e.results[e.results.length - 1];
-      st.textContent = "聽到：" + res0[0].transcript;
-      if (res0.isFinal) { gotFinal = true; finalTexts = []; for (var k = 0; k < res0.length; k++) finalTexts.push(res0[k].transcript); }
+      var alts = [], fin = [], interim = "";
+      for (var i = 0; i < e.results.length; i++) {
+        var rs = e.results[i];
+        if (rs.isFinal) { for (var k = 0; k < rs.length; k++) fin[k] = (fin[k] || "") + rs[k].transcript; }
+        interim += rs[0].transcript;
+      }
+      heard = [interim]; if (fin.length) finalHeard = fin;
+      st.textContent = "聽到：" + interim;
+      if (fin.length && e.results[e.results.length - 1].isFinal) finish();
     };
     r.onerror = function (e) {
-      var m = { "not-allowed": "麥克風沒有開放。請在瀏覽器網址列旁的設定允許使用麥克風，再按一次。", "service-not-allowed": "麥克風沒有開放。請在瀏覽器設定允許使用麥克風。", "no-speech": "沒有聽到聲音，靠近麥克風再說一次。", "audio-capture": "找不到麥克風，請確認裝置有麥克風。", "network": "語音辨識需要網路，請確認連線後再試。", "aborted": "" };
-      st.textContent = m[e.error] != null ? m[e.error] : "辨識失敗，請再試一次。";
+      var m = { "not-allowed": "麥克風沒有開放。請在瀏覽器網址列旁的設定允許使用麥克風，再按一次。", "service-not-allowed": "麥克風沒有開放。請在瀏覽器設定允許使用麥克風。", "no-speech": "沒有聽到聲音，靠近麥克風再說一次。", "audio-capture": "找不到麥克風，請確認裝置有麥克風。", "network": "語音辨識需要網路，請確認連線後再試。" };
+      if (e.error !== "aborted") errMsg = m[e.error] || "辨識失敗，請再試一次。";
+      finish();
     };
-    r.onend = function () {
-      if (rec === r) rec = null;
-      btn.classList.remove("rec"); btn.lastChild.textContent = "再說一次";
-      if (!gotFinal) { if (!st.textContent || st.textContent === "正在聽…") st.textContent = "沒有聽到聲音，靠近麥克風再說一次。"; return; }
-      var bestG = null, bestText = "";
-      finalTexts.forEach(function (t) { var g = grade(target, ro, t); if (!bestG || g.score > bestG.score) { bestG = g; bestText = t; } });
-      spoken[turnIndex] = Math.max(spoken[turnIndex] || 0, bestG.score);
-      var lv = bestG.score >= 85 ? ["great", "很棒！說得很清楚。"] : bestG.score >= 60 ? ["ok", "不錯！有幾個地方可以再清楚一點。"] : ["low", "再試一次，可以先按「聽」跟著念。"];
-      res.hidden = false; res.className = "mc-res " + lv[0];
-      res.innerHTML = '<div class="mc-score"><b>' + bestG.score + '</b><small>分</small></div><div class="mc-fb"><b>' + lv[1] + "</b><span>電腦聽到：" + esc(bestText) + "</span>" +
-        (bestG.missing.length ? "<span>可能沒說清楚：" + esc(bestG.missing.join("、")) + "</span>" : "") + "</div>";
-      st.textContent = "";
-    };
-    try { r.start(); } catch (e) { rec = null; btn.classList.remove("rec"); st.textContent = "無法開始錄音，請再按一次。"; }
+    r.onend = finish;
+    guard = setTimeout(function () { try { r.stop(); } catch (e) {} guard = setTimeout(finish, 1500); }, 12000);
+    try { r.start(); } catch (e) { errMsg = "無法開始錄音，請再按一次。"; finish(); }
   });
   return card;
 }
