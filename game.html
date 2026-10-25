@@ -334,7 +334,7 @@ var SCENES = [
     ["いらっしゃいませ。", "irasshaimase.", "歡迎光臨。", 0, "這是店員招呼客人的話。"],
     ["いくらですか？", "ikura desu ka?", "多少錢？", 0, "這是問價錢的話。"]]],
   ["どこから来ましたか？", "doko kara kimashita ka?", "你從哪裡來？", [
-    ["台湾の桃園から来ました。", "Taiwan no Tōen kara kimashita.", "我從台灣桃園來。", 1, "說出城市，對方更容易記得你。"],
+    ["台湾のタオユエンから来ました。", "Taiwan no Taoyuen kara kimashita.", "我從台灣桃園來。", 1, "說出城市，對方更容易記得你。桃園用台灣地名的唸法「タオユエン」（Taoyuan）。"],
     ["京都のホテルです。", "Kyōto no hoteru desu.", "京都的飯店。", 0, "對方問你從哪裡來，不是住哪裡。"],
     ["五日間です。", "itsukakan desu.", "五天。", 0, "這是在回答天數。"]]],
   ["今日は、なんの楽器を演奏しますか？", "kyō wa, nan no gakki o ensō shimasu ka?", "你今天負責什麼樂器？", [
@@ -714,7 +714,9 @@ function speak(text, btn) {
   if (!synth) return;
   var same = btn && playing === btn; stop(); if (same) return;
   var lang = LANG === "en" ? "en-US" : "ja-JP";
-  var u = new SpeechSynthesisUtterance(text.replace(/○+/g, LANG === "en" ? ", " : "、"));
+  var say = text.replace(/○+/g, LANG === "en" ? ", " : "、");
+  if (LANG === "en") say = say.replace(/Taoyuan/g, "Dow Yuen");
+  var u = new SpeechSynthesisUtterance(say);
   var v = voiceFor(lang); u.lang = v ? v.lang : lang; if (v) u.voice = v; u.rate = LANG === "en" ? 0.9 : 0.85;
   if (!v) { $("vnote").hidden = false; $("vnote").textContent = "這個裝置沒有找到" + (LANG === "en" ? "英文" : "日文") + "語音，發音可能不標準。可以在手機或電腦的語音設定下載語音。"; }
   if (btn) { playing = btn; btn.classList.add("playing"); }
@@ -757,13 +759,13 @@ function kataToHira(s) { return s.replace(/[ァ-ヶ]/g, function (c) { return St
 function normJa(s, strip) {
   s = String(s).normalize("NFKC");
   strip.forEach(function (x) { if (x) s = s.split(x).join(""); });
-  return kataToHira(s).replace(/[\s、。，．,.!！?？「」『』・…〜~○ー]/g, "");
+  return kataToHira(s).replace(/桃園|桃园|たおゆえん|たおゆあん|たおゆわん/g, "たおゆえん").replace(/[\s、。，．,.!！?？「」『』・…〜~○ー]/g, "");
 }
 var CONTR = { "i'm": "i am", "it's": "it is", "let's": "let us", "i'll": "i will", "don't": "do not", "you're": "you are", "i'd": "i would", "here's": "here is", "that's": "that is", "can't": "cannot", "what's": "what is", "ok": "okay", "5th": "fifth", "mr": "mister", "ms": "miss" };
 function wordsEn(s, strip) {
   s = String(s).toLowerCase().replace(/[’‘]/g, "'");
   strip.forEach(function (x) { if (x) s = s.split(x.toLowerCase()).join(" "); });
-  return s.replace(/[^a-z0-9' ]/g, " ").split(/\s+/).filter(Boolean).map(function (w) { return CONTR[w] || w; }).join(" ").split(" ").filter(Boolean);
+  return s.replace(/\b(tao|dao|dow|tau)\s*(yuan|yuen|ywen|yuanne)\b/g, "taoyuan").replace(/[^a-z0-9' ]/g, " ").split(/\s+/).filter(Boolean).map(function (w) { return CONTR[w] || w; }).join(" ").split(" ").filter(Boolean);
 }
 function lcs(a, b) {
   var m = a.length, n = b.length, d = [], i, j;
