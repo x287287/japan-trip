@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>網站使用導覽影片</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@900&display=swap">
+<style>
+:root{--bg:#0F1826;--navy:#1B2A41;--cream:#F6F2EA;--red:#C8361F;--coral:#F08A74;--mut:#B6BFCE}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--cream);font-family:'Noto Sans TC',sans-serif}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px 16px}
+#wrap{width:100%;max-width:1280px;aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:14px;background:var(--navy)}
+#stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;background:var(--navy)}
+.paused *{animation-play-state:paused!important}
+/* left text */
+.txt{position:absolute;left:84px;top:0;bottom:0;width:560px;display:flex;flex-direction:column;justify-content:center;gap:22px;opacity:0;pointer-events:none}
+.txt.on{opacity:1}
+.kick{font-size:20px;font-weight:700;color:var(--coral);letter-spacing:.08em}
+.ttl{margin:0;font-family:'Noto Serif TC',serif;font-weight:900;font-size:60px;line-height:1.2}
+.ln{font-size:28px;line-height:1.55;color:#E4E8EF;margin:0}
+.txt.on .kick,.txt.on .ttl,.txt.on .ln{animation:up .6s both}
+.txt.on .ttl{animation-delay:.1s}.txt.on .ln:nth-of-type(1){animation-delay:.4s}.txt.on .ln:nth-of-type(2){animation-delay:.7s}.txt.on .ln:nth-of-type(3){animation-delay:1s}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+/* phone */
+.phone{position:absolute;left:800px;top:50px;width:340px;height:620px;border:6px solid #3A4A66;border-radius:44px;background:#fff;color:var(--navy);overflow:hidden}
+.sc{position:absolute;inset:0;padding:34px 16px 16px;opacity:0;transition:opacity .35s}
+.sc.on{opacity:1}
+.sc .a{opacity:0}
+.sc.on .a{animation:up .55s both;animation-delay:var(--d,0s)}
+.sc.on .pop{animation:pop .6s cubic-bezier(.2,1.4,.4,1) both;animation-delay:var(--d,0s)}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.hdr{font-family:'Noto Serif TC',serif;font-weight:900;font-size:22px;margin:0 0 10px}
+.hero{border-radius:16px;background:var(--navy);color:var(--cream);padding:18px;font-family:'Noto Serif TC',serif;font-weight:900;font-size:26px;line-height:1.3}
+.hero small{display:block;font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:14px;margin-top:8px;color:#D5DBE6}
+.bar{height:14px;border-radius:7px;background:#EEF0F4;margin:8px 0}
+.card{border:1px solid #D9DEE7;border-radius:14px;padding:12px 14px;margin:10px 0;font-size:15px}
+.card b{display:block;margin-bottom:6px}
+.chips{display:flex;gap:6px;margin:6px 0 10px;flex-wrap:wrap}
+.chip{padding:6px 11px;border-radius:99px;background:#EEF0F4;font-size:13px;font-weight:700;color:#33415A}
+.chip.on2{background:var(--navy);color:#fff}
+.lbl{position:absolute;background:var(--red);color:#fff;font-weight:700;font-size:13px;padding:4px 10px;border-radius:99px}
+/* s1 home */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;margin-top:20px;text-align:center;font-size:11px}
+.ic{width:52px;height:52px;border-radius:13px;background:#DDE2EA;margin:0 auto 4px}
+.ic.me{background:var(--red);color:#fff;font-family:'Noto Serif TC',serif;font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center}
+.ripple{position:absolute;width:70px;height:70px;border-radius:50%;border:3px solid var(--red);left:20px;top:132px;opacity:0}
+.sc.on .ripple{animation:rip 1.2s 1.6s 2}
+@keyframes rip{0%{opacity:.9;transform:scale(.4)}100%{opacity:0;transform:scale(1.4)}}
+/* s2 login */
+.fld{border:2px solid var(--navy);border-radius:12px;padding:12px 14px;font-size:20px;font-weight:700;margin:10px 0;height:52px;overflow:hidden}
+.type{display:inline-block;white-space:nowrap;overflow:hidden;vertical-align:bottom;width:0}
+.sc.on .type{animation:typ 1.2s steps(3) 1s forwards}
+@keyframes typ{to{width:3.1em}}
+.btn{background:var(--red);color:#fff;text-align:center;font-weight:700;border-radius:12px;padding:13px;font-size:17px;margin-top:14px}
+/* s3 announce */
+.imp{border:2px solid var(--red);background:#FBE9E5;border-radius:14px;padding:12px 14px;font-size:15px;margin:10px 0}
+.tag{display:inline-block;background:var(--red);color:#fff;font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px;margin-bottom:6px}
+/* s4 days */
+.day.on3{background:var(--red);color:#fff}
+.sc.on #dsel{animation:dsel 4s 1s both}
+/* s7 checklist */
+.it{display:flex;gap:10px;align-items:center;padding:10px 4px;border-bottom:1px solid #E4E8EF;font-size:16px}
+.cb{width:22px;height:22px;border-radius:6px;border:2px solid #8793A8;position:relative;flex:none}
+.cb i{position:absolute;inset:0;background:var(--navy);border-radius:4px;opacity:0}
+.sc.on .cb i{animation:tick .3s both;animation-delay:var(--d)}
+@keyframes tick{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+.prog{height:12px;border-radius:6px;background:#EEF0F4;overflow:hidden;margin:6px 0 4px}
+.prog i{display:block;height:100%;width:0;background:var(--red);border-radius:6px}
+.sc.on .prog i{animation:fill 3s 1.2s forwards}
+@keyframes fill{to{width:66%}}
+.note{font-size:12px;color:#5B6679;margin-left:32px;margin-top:6px}
+/* s8 phrase */
+.jp{font-family:'Noto Serif TC',serif;font-weight:900;font-size:30px;margin:6px 0 2px}
+.rm{font-size:14px;color:#5B6679}
+.pl{display:flex;gap:10px;margin-top:12px}
+.pl span{flex:1;text-align:center;padding:10px;border-radius:12px;background:var(--navy);color:#fff;font-weight:700;font-size:14px}
+.pl span.sl{background:#EEF0F4;color:var(--navy)}
+.wave{display:flex;gap:4px;align-items:center;height:26px;margin-top:10px}
+.wave i{width:5px;border-radius:3px;background:var(--red);height:6px}
+.sc.on .wave i{animation:w .7s ease-in-out infinite alternate}
+.wave i:nth-child(2n){animation-delay:.15s!important}.wave i:nth-child(3n){animation-delay:.3s!important}
+@keyframes w{to{height:24px}}
+/* s9 groups */
+.gp{border-radius:14px;padding:12px 14px;margin:10px 0;color:#fff;font-weight:700}
+/* s10 */
+.url{font-size:22px;font-weight:700;background:var(--navy);color:#fff;border-radius:14px;padding:16px;text-align:center;margin-top:26px;word-break:break-all}
+.opts{margin-top:8px}.op{border:1px solid #D9DEE7;border-radius:10px;padding:10px 12px;margin:6px 0;font-size:15px;font-weight:700}
+.mch{display:flex;justify-content:space-between;align-items:center;border:1px solid #D9DEE7;border-radius:10px;padding:9px 12px;margin:6px 0;font-size:15px;font-weight:700}
+.mch i{font-style:normal;font-size:12px;background:#EEF0F4;border-radius:99px;padding:2px 9px;color:#33415A}
+.kidh{font-family:'Noto Serif TC',serif;font-weight:900;font-size:20px;margin:8px 0 6px}
+#back{display:none;align-self:flex-start;color:var(--cream);font-weight:700;text-decoration:none;padding:10px 4px}
+#back.show{display:inline-block}
+body.pt #wrap{aspect-ratio:720/1080;max-width:720px}
+body.pt #stage{width:720px;height:1080px}
+body.pt .txt{left:48px;top:44px;bottom:auto;width:624px;height:380px;justify-content:flex-start;gap:14px}
+body.pt .ttl{font-size:46px}body.pt .ln{font-size:23px;line-height:1.5}
+body.pt .phone{left:190px;top:440px}
+/* controls */
+#ctl{width:100%;max-width:1280px;display:flex;align-items:center;gap:12px}
+button{font:inherit;color:var(--cream);background:#243552;border:0;border-radius:10px;min-width:44px;min-height:44px;padding:0 14px;cursor:pointer;font-weight:700}
+button:hover{background:#2F4570}
+button:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+#seek{flex:1;position:relative;height:44px;cursor:pointer;display:flex;align-items:center}
+#track{width:100%;height:8px;background:#243552;border-radius:4px;position:relative;overflow:hidden}
+#fillb{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--coral)}
+#ticks{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none}
+#ticks i{position:absolute;top:50%;width:2px;height:16px;margin-top:-8px;background:#0F1826}
+#tm{font-size:14px;color:var(--mut);min-width:84px;text-align:right}
+</style>
+</head>
+<body>
+<a id="back" href="./">← 回到網站</a>
+<div id="wrap"><div id="stage" role="img" aria-label="網站使用導覽動畫">
+
+<!-- 左側文字 -->
+<div class="txt" data-s="0"><div class="kick">公埔國小 · 115 學年度日本國際交流</div><h1 class="ttl">網站使用導覽</h1><p class="ln">一支影片，看懂行程網站怎麼用。</p><p class="ln">學生、家長、老師都適用。</p></div>
+<div class="txt" data-s="1"><div class="kick">STEP 1 · 加入主畫面</div><h2 class="ttl">把網站放在手機桌面</h2><p class="ln">像 App 一樣，一點就開。</p><p class="ln">Android 用 Chrome、iPhone 用 Safari，步驟請看教學圖卡。</p></div>
+<div class="txt" data-s="2"><div class="kick">STEP 2 · 登入</div><h2 class="ttl">用中文姓名登入</h2><p class="ln">不用填 email。</p><p class="ln">第一次先「申請新帳號」，之後直接登入。</p></div>
+<div class="txt" data-s="3"><div class="kick">STEP 2 · 申請帳號</div><h2 class="ttl">先選你的身分</h2><p class="ln">師長、學生、家長（留在台灣）、隨行家長（一起去日本），四種擇一。</p><p class="ln">老師核准後，就能看到網站內容。</p></div>
+<div class="txt" data-s="4"><div class="kick">公告</div><h2 class="ttl">重要公告在最上面</h2><p class="ln">老師發布的通知會出現在首頁上方。</p><p class="ln">標示「重要」的公告固定排在最前面。</p></div>
+<div class="txt" data-s="5"><div class="kick">行程總覽</div><h2 class="ttl">五天行程一次看</h2><p class="ln">12/14 到 12/18，點選日期切換。</p><p class="ln">每天的時間、地點、說明都在這裡。</p></div>
+<div class="txt" data-s="6"><div class="kick">航班資訊 · 今日行程</div><h2 class="ttl">出發前先看航班</h2><p class="ln">航班與集合資訊集中在同一區。</p><p class="ln">行程當天，點「今日行程」直接看當天安排。</p></div>
+<div class="txt" data-s="7"><div class="kick">行程提醒</div><h2 class="ttl">準備事項與當地規則</h2><p class="ln">「行程準備」整理出發前要做的事。</p><p class="ln">「當地規則」說明在日本要注意的禮儀。</p></div>
+<div class="txt" data-s="8"><div class="kick">攜帶物品檢核</div><h2 class="ttl">打勾確認行李</h2><p class="ln">一邊收行李一邊打勾，進度條自動更新。</p><p class="ln">「我的物品」可新增自己的項目、加備註。</p></div>
+<div class="txt" data-s="9"><div class="kick">常用會話</div><h2 class="ttl">日語聽得到，也會唸</h2><p class="ln">點播放聽發音，也可以選慢速。</p><p class="ln">最後一個分類「交流對話遊戲」，練習更有趣。</p></div>
+<div class="txt" data-s="10"><div class="kick">我的分組</div><h2 class="ttl">查看自己的小組</h2><p class="ln">登入後可看到自己的組別，以及全部同組成員。</p><p class="ln">名單會標示每個人的身分，分組由老師在後台設定。</p></div>
+<div class="txt" data-s="11"><div class="kick">家長（留在台灣）</div><h2 class="ttl">在家也能看孩子的分組</h2><p class="ln">不會顯示行李檢核與常用會話。</p><p class="ln">「孩子的分組」顯示孩子的組別與全部同組成員。</p><p class="ln">孩子與家長的配對，由老師在後台設定。</p></div>
+<div class="txt" data-s="12"><div class="kick">開始使用</div><h2 class="ttl">現在就打開網站</h2><p class="ln">有問題請詢問帶隊老師。</p></div>
+
+<!-- 手機畫面 -->
+<div class="phone" aria-hidden="true">
+<!-- 0 -->
+<div class="sc" data-s="0"><div class="hero pop" style="--d:.3s;margin-top:60px">公埔國小<br>日本交流行<small>12/14 – 12/18</small></div><div class="bar a" style="--d:1s;width:80%"></div><div class="bar a" style="--d:1.2s;width:60%"></div><div class="card a" style="--d:1.5s"><b>行程</b>航班 · 提醒 · 會話 · 分組</div></div>
+<!-- 1 -->
+<div class="sc" data-s="1"><div class="grid">
+<div><div class="ic"></div>相機</div><div><div class="ic"></div>地圖</div><div><div class="ic"></div>訊息</div><div><div class="ic"></div>時鐘</div>
+<div><div class="ic"></div>照片</div><div><div class="ic me pop" style="--d:1s">日本</div>日本交流行</div><div><div class="ic"></div>設定</div><div><div class="ic"></div>天氣</div></div>
+<div class="ripple" style="left:127px;top:104px"></div>
+<span class="lbl a" style="--d:1.8s;left:108px;top:180px">點一下就開啟</span></div>
+<!-- 2 -->
+<div class="sc" data-s="2"><h3 class="hdr" style="margin-top:50px">登入</h3><div style="font-size:13px;color:#5B6679">姓名</div><div class="fld"><span class="type">王小明</span></div><div class="btn a" style="--d:2.4s">登入</div><div class="a" style="--d:3s;text-align:center;margin-top:16px;font-size:14px;color:#33415A">第一次使用？申請新帳號</div></div>
+<!-- 3 -->
+<div class="sc" data-s="4"><h3 class="hdr" style="margin-top:40px">公告</h3>
+<div class="imp a" style="--d:.5s"><span class="tag">重要</span><br><b>集合時間與地點</b><div class="bar" style="width:90%"></div><div class="bar" style="width:60%"></div></div>
+<div class="card a" style="--d:1.2s"><b>一般公告</b><div class="bar" style="width:85%"></div></div>
+<div class="card a" style="--d:1.6s"><b>一般公告</b><div class="bar" style="width:70%"></div></div>
+<span class="lbl a" style="--d:2.2s;right:16px;top:74px">置頂顯示</span></div>
+<!-- 3 -->
+<div class="sc" data-s="3"><h3 class="hdr" style="margin-top:44px">申請新帳號</h3><div style="font-size:13px;color:#5B6679">你的身分</div>
+<div class="fld a" style="--d:.3s;height:46px;font-size:16px">請選擇</div>
+<div class="opts"><div class="op a" style="--d:.7s">師長</div><div class="op a" style="--d:1s">學生</div><div class="op a" style="--d:1.3s">家長（留在台灣）</div><div class="op a" style="--d:1.6s">隨行家長（一起去日本）</div></div></div>
+<!-- 4 -->
+<div class="sc" data-s="5"><h3 class="hdr" style="margin-top:40px">行程總覽</h3>
+<div class="chips"><span class="chip on2">12/14</span><span class="chip">12/15</span><span class="chip">12/16</span><span class="chip">12/17</span><span class="chip">12/18</span></div>
+<div class="card a" style="--d:.5s"><b>第 1 天</b><div class="bar" style="width:90%"></div><div class="bar" style="width:70%"></div></div>
+<div class="card a" style="--d:.9s"><b>時間 · 地點</b><div class="bar" style="width:80%"></div></div>
+<div class="card a" style="--d:1.3s"><b>說明</b><div class="bar" style="width:95%"></div><div class="bar" style="width:55%"></div></div></div>
+<!-- 5 -->
+<div class="sc" data-s="6"><h3 class="hdr" style="margin-top:40px">航班資訊</h3>
+<div class="card a" style="--d:.5s"><b>去程</b><div class="bar" style="width:75%"></div></div>
+<div class="card a" style="--d:.9s"><b>回程</b><div class="bar" style="width:75%"></div></div>
+<div class="btn a" style="--d:1.8s;background:var(--navy)">今日行程 →</div></div>
+<!-- 6 -->
+<div class="sc" data-s="7"><h3 class="hdr" style="margin-top:40px">行程提醒</h3>
+<div class="chips"><span class="chip on2">行程準備</span><span class="chip">當地規則</span></div>
+<div class="card a" style="--d:.5s"><b>出發前</b><div class="bar" style="width:90%"></div><div class="bar" style="width:65%"></div></div>
+<div class="card a" style="--d:2.2s;border-color:var(--red)"><b>當地規則</b><div class="bar" style="width:85%"></div><div class="bar" style="width:70%"></div></div></div>
+<!-- 7 -->
+<div class="sc" data-s="8"><h3 class="hdr" style="margin-top:40px">攜帶物品檢核</h3>
+<div class="chips"><span class="chip on2">官方清單</span><span class="chip">我的物品</span></div>
+<div class="prog"><i></i></div><div style="font-size:12px;color:#5B6679">已準備 2 / 3</div>
+<div class="it"><span class="cb"><i style="--d:.8s"></i></span>護照</div>
+<div class="it"><span class="cb"><i style="--d:1.6s"></i></span>換洗衣物</div>
+<div class="it"><span class="cb"><i style="--d:9s"></i></span>常備藥品</div>
+<div class="note a" style="--d:2.6s">備註：自己的物品也能新增</div></div>
+<!-- 8 -->
+<div class="sc" data-s="9"><h3 class="hdr" style="margin-top:40px">常用會話</h3>
+<div class="chips"><span class="chip">打招呼</span><span class="chip">購物</span><span class="chip a on2" style="--d:2.2s">交流對話遊戲</span></div>
+<div class="card a" style="--d:.4s"><div class="jp">ありがとう</div><div class="rm">謝謝</div>
+<div class="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="pl"><span>播放</span><span class="sl">慢速</span></div></div></div>
+<!-- 9 -->
+<div class="sc" data-s="10"><h3 class="hdr" style="margin-top:40px">我的分組</h3>
+<div class="gp a" style="--d:.4s;background:#2E6F57">第 1 組<div style="font-weight:500;font-size:13px;margin-top:4px">全部同組成員</div></div>
+<div class="mch a" style="--d:1s">王小明<i>學生</i></div><div class="mch a" style="--d:1.2s">陳小華<i>學生</i></div><div class="mch a" style="--d:1.4s">李老師<i>師長</i></div><div class="mch a" style="--d:1.6s">林小美<i>隨行家長</i></div>
+<div class="card a" style="--d:2.2s">組別由老師設定<div class="bar" style="width:70%"></div></div></div>
+<!-- 11 -->
+<div class="sc" data-s="11"><h3 class="hdr" style="margin-top:40px">孩子的分組</h3>
+<div class="chips"><span class="chip">總覽</span><span class="chip">行程提醒</span><span class="chip on2">孩子的分組</span></div>
+<div class="kidh a" style="--d:.4s">王小明</div>
+<div class="gp a" style="--d:.8s;background:#2E6F57">第 1 組<div style="font-weight:500;font-size:13px;margin-top:4px">孩子與全部同組成員</div></div>
+<div class="mch a" style="--d:1.3s">王小明<i>學生</i></div><div class="mch a" style="--d:1.5s">陳小華<i>學生</i></div><div class="mch a" style="--d:1.7s">李老師<i>師長</i></div><div class="mch a" style="--d:1.9s">林小美<i>隨行家長</i></div>
+<div class="note a" style="--d:2.8s;margin-left:0">看不到行李檢核與常用會話</div></div>
+<!-- 10 -->
+<div class="sc" data-s="12"><div class="hero pop" style="--d:.3s;margin-top:70px">公埔國小<br>日本交流行<small>115 學年度國際交流</small></div><div class="url a" style="--d:1s">x287287.github.io/japan-trip</div></div>
+
+</div>
+</div></div>
+
+<div id="ctl">
+<button id="pp" aria-label="播放或暫停">暫停</button>
+<button id="rp" aria-label="從頭重播">重播</button>
+<div id="seek" role="slider" aria-label="影片進度" tabindex="0"><div id="track"><div id="fillb"></div><div id="ticks"></div></div></div>
+<div id="tm">0:00 / 1:05</div>
+</div>
+
+<script>
+(function(){
+var D=[5,5,5,6,5,5,5,5,5,5,6,6,5], total=D.reduce(function(a,b){return a+b},0);
+var stage=document.getElementById('stage'),wrap=document.getElementById('wrap');
+var els=[].slice.call(stage.querySelectorAll('[data-s]'));
+var cur=-1,t=0,playing=true,last=null;
+var starts=[];D.reduce(function(a,d,i){starts[i]=a;return a+d},0);
+function fit(){var pt=window.innerWidth<760&&window.innerHeight>window.innerWidth;document.body.classList.toggle('pt',pt);stage.style.transform='scale('+wrap.clientWidth/(pt?720:1280)+')'}
+try{if(/github\.io$/.test(location.hostname))document.getElementById('back').classList.add('show')}catch(e){}
+window.addEventListener('resize',fit);fit();
+function setScene(i){
+  els.forEach(function(e){e.classList.remove('on')});
+  void stage.offsetWidth;
+  els.forEach(function(e){if(+e.dataset.s===i)e.classList.add('on')});
+  cur=i;
+}
+var ticks=document.getElementById('ticks');
+starts.slice(1).forEach(function(s){var i=document.createElement('i');i.style.left=(s/total*100)+'%';ticks.appendChild(i)});
+var fillb=document.getElementById('fillb'),tm=document.getElementById('tm'),pp=document.getElementById('pp');
+function fmt(s){s=Math.floor(s);return Math.floor(s/60)+':'+('0'+s%60).slice(-2)}
+function idx(){for(var i=D.length-1;i>=0;i--)if(t>=starts[i])return i;return 0}
+function ui(){fillb.style.width=(t/total*100)+'%';tm.textContent=fmt(t)+' / '+fmt(total);pp.textContent=playing?'暫停':(t>=total?'重播':'播放')}
+function tick(now){
+  if(last===null)last=now;
+  var dt=(now-last)/1000;last=now;
+  if(playing){t+=dt;if(t>=total){t=total-0.001;playing=false;stage.classList.add('paused')}}
+  var i=idx();if(i!==cur)setScene(i);
+  ui();requestAnimationFrame(tick);
+}
+function seekTo(s){t=Math.max(0,Math.min(total-0.001,s));setScene(idx());t=starts[idx()];}
+pp.onclick=function(){
+  if(!playing&&t>=total-0.01){seekTo(0)}
+  playing=!playing;stage.classList.toggle('paused',!playing);
+};
+document.getElementById('rp').onclick=function(){seekTo(0);playing=true;stage.classList.remove('paused')};
+var sk=document.getElementById('seek');
+sk.addEventListener('click',function(e){var r=sk.getBoundingClientRect();seekTo((e.clientX-r.left)/r.width*total);if(playing)stage.classList.remove('paused')});
+sk.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight')seekTo(starts[Math.min(D.length-1,idx()+1)]);
+  if(e.key==='ArrowLeft')seekTo(starts[Math.max(0,idx()-1)]);
+});
+window.__seek=seekTo;
+setScene(0);requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
