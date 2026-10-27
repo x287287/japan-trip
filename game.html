@@ -832,18 +832,21 @@ function speakCard(o, turnIndex) {
     var r; try { r = new SRC(); } catch (e) { st.textContent = "這個瀏覽器無法使用語音辨識，請改用 Safari 或 Chrome 開啟。"; return; }
     rec = r;
     r.lang = LANG === "en" ? "en-US" : "ja-JP"; r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
-    var heard = [], finalHeard = [], errMsg = "", done = false, guard = 0;
+    var heard = [], finalHeard = [], errMsg = "", done = false, guard = 0, errCode = "", gotAudio = false, gotSound = false, gotSpeech = false;
     btn.classList.add("rec"); btn.lastChild.textContent = "說完按這裡"; st.textContent = "正在聽…請說話"; res.hidden = true;
     /* grade once: on a final result, when recognition ends, or when the student taps 說完 */
     function finish() {
       if (done) return; done = true; clearTimeout(guard);
       if (rec === r) rec = null;
-      r.onresult = r.onerror = r.onend = null;
+      r.onresult = r.onerror = r.onend = r.onaudiostart = r.onsoundstart = r.onspeechstart = null;
       try { r.abort(); } catch (e) {}
       btn.classList.remove("rec"); delete btn.dataset.busy; btn.lastChild.textContent = "再說一次";
       var texts = (finalHeard.length ? finalHeard : heard).filter(function (t) { return t && t.trim(); });
       if (texts.length) showResult(texts);
-      else st.textContent = errMsg || "沒有聽到聲音。靠近麥克風，按「開始說」後再說一次。";
+      else {
+        var why = !gotAudio ? "麥克風沒有啟動" : !gotSound ? "麥克風沒收到聲音" : !gotSpeech ? "有聲音但不像人聲" : "有聽到但無法辨識";
+        st.textContent = (errMsg || "沒有聽到聲音。靠近麥克風，按「開始說」後再說一次。") + "（" + why + (errCode ? "／" + errCode : "") + "）";
+      }
     }
     r.finish = function () { st.textContent = "辨識中…"; try { r.stop(); } catch (e) {} clearTimeout(guard); guard = setTimeout(finish, 1500); };
     r.onresult = function (e) {
@@ -860,10 +863,13 @@ function speakCard(o, turnIndex) {
       if (fin.length && e.results[e.results.length - 1].isFinal) finish();
     };
     r.onerror = function (e) {
-      var m = { "not-allowed": "麥克風沒有開放。請在瀏覽器網址列旁的設定允許使用麥克風，再按一次。", "service-not-allowed": "麥克風沒有開放。請在瀏覽器設定允許使用麥克風。", "no-speech": "沒有聽到聲音，靠近麥克風再說一次。", "audio-capture": "找不到麥克風，請確認裝置有麥克風。", "network": "語音辨識需要網路，請確認連線後再試。" };
-      if (e.error !== "aborted") errMsg = m[e.error] || "辨識失敗，請再試一次。";
+      var m = { "not-allowed": "麥克風沒有開放。請在瀏覽器網址列旁的設定允許使用麥克風，再按一次。", "service-not-allowed": "麥克風沒有開放。請在瀏覽器設定允許使用麥克風。", "no-speech": "沒有聽到聲音，靠近麥克風再說一次。", "audio-capture": "找不到麥克風，請確認裝置有麥克風。", "network": "語音辨識需要網路，請確認連線後再試。", "language-not-supported": "這個瀏覽器不支援" + (LANG === "en" ? "英文" : "日文") + "語音辨識，請改用 Chrome（Android）或 Safari（iPhone）。" };
+      errCode = e.error; if (e.error !== "aborted") errMsg = m[e.error] || "辨識失敗，請再試一次。";
       finish();
     };
+    r.onaudiostart = function () { gotAudio = true; };
+    r.onsoundstart = function () { gotSound = true; };
+    r.onspeechstart = function () { gotSpeech = true; st.textContent = "聽到聲音了…"; };
     r.onend = finish;
     guard = setTimeout(function () { try { r.stop(); } catch (e) {} guard = setTimeout(finish, 1500); }, 12000);
     /* give the speaker/audio session a moment to release before the mic opens (iOS & Android) */
