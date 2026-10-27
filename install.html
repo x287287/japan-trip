@@ -30,9 +30,9 @@ h1{margin:0 0 12px;font-family:'Noto Serif TC',serif;font-size:26px}
 .url{background:#fff;border-radius:12px;padding:8px 12px;font-size:12px;text-align:center;color:#33415A;border:1px solid #D9DEE7;margin-bottom:12px}
 .hero{margin:34px 12px 8px;border-radius:14px;background:#1B2A41;color:#F6F2EA;padding:16px;font-family:'Noto Serif TC',serif;font-weight:900;font-size:20px;line-height:1.3}
 .blk{margin:8px 12px;height:44px;border-radius:10px;background:#EEF0F4}
-.dots{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff}
-.menu{position:absolute;right:10px;top:46px;width:200px;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(27,42,65,.28);border:1px solid #D9DEE7;padding:6px 0}
-.mi{padding:9px 14px;font-size:14px;color:#1B2A41}
+.dots{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:99px;flex:none}
+.menu{position:absolute;right:10px;bottom:62px;width:150px;background:#fff;border-radius:14px;box-shadow:0 4px 18px rgba(27,42,65,.25);overflow:hidden}
+.mi{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;font-size:14px;border-bottom:1px solid #E4E8EF}
 .mi.on{background:#FBE9E5;font-weight:700;margin:0 6px;border-radius:8px}
 .dim{position:absolute;inset:0;background:rgba(27,42,65,.35)}
 .dlg{position:absolute;left:18px;right:18px;top:40px;background:#fff;border-radius:18px;padding:18px;box-shadow:0 8px 28px rgba(27,42,65,.35)}
@@ -43,6 +43,9 @@ h1{margin:0 0 12px;font-family:'Noto Serif TC',serif;font-size:26px}
 .lb{font-size:11px;text-align:center;margin-top:4px;color:#1B2A41}
 .sb{position:absolute;left:0;right:0;bottom:0;background:#F2F3F6;padding:10px 12px 12px;border-top:1px solid #D9DEE7}
 .tb{display:flex;justify-content:space-around;align-items:center}
+.mi:last-child{border:0}
+.ub{display:flex;align-items:center;gap:8px}
+.url2{flex:1;background:#fff;border-radius:99px;padding:9px 14px;font-size:12px;color:#33415A;border:1px solid #D9DEE7}
 .tb div{width:32px;height:32px;display:flex;align-items:center;justify-content:center}
 .sheet{position:absolute;inset:30px 0 0 0;background:#F2F3F6;border-radius:18px 18px 0 0;padding:14px 14px}
 .sh{font-weight:700;font-size:14px;margin-bottom:10px}
@@ -148,28 +151,23 @@ h1{margin:0 0 12px;font-family:'Noto Serif TC',serif;font-size:26px}
 </div></div></div>
 <div class="cw"><div class="cs"><div class="c">
 <div class="top"><span class="chip">iPhone · Safari</span><span class="st">步驟 2 / 4</span></div>
-<h2 class="t">點下方的「分享」</h2>
-<p class="d">畫面底部工具列中間，有一個「方框加向上箭頭」的圖示，點它。</p>
+<h2 class="t">點「⋯」，再點「分享」</h2>
+<p class="d">新版 Safari 的分享鍵藏起來了。先點網址列右邊的「⋯」，跳出選單後再點「分享」。</p>
 <div class="stage">
 <div class="ph">
 <div class="hero">公埔國小<br>日本交流行<div style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:13px;margin-top:6px">12/14 – 12/18</div></div>
 <div class="blk"></div><div class="blk"></div>
-<div class="sb"><div class="url">x287287.github.io/japan-trip</div>
-<div class="tb">
-<div><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg></div>
-<div><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 4l6 6-6 6"/></svg></div>
-<div class="hl"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="分享"><path d="M7 9H5v10h12V9h-2M11 14V3M7.5 6.5L11 3l3.5 3.5"/></svg></div>
-<div><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h12v15l-6-4-6 4z"/></svg></div>
-<div><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><rect x="9" y="9" width="10" height="10" rx="2" fill="#F2F3F6"/></svg></div>
-</div></div>
-<span class="tip" style="left:96px;bottom:84px">點這裡</span>
+<div class="menu"><div class="mi">拷貝連結</div><div class="mi hl" style="font-weight:700;background:#FBE9E5"><span>分享</span><svg width="18" height="18" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="分享"><path d="M7 9H5v10h12V9h-2M11 14V3M7.5 6.5L11 3l3.5 3.5"/></svg></div><div class="mi">加入書籤</div></div>
+<div class="sb"><div class="ub"><div class="url2">x287287.github.io/japan-trip</div><div class="dots hl"><svg width="20" height="20" viewBox="0 0 20 20" role="img" aria-label="更多"><circle cx="4" cy="10" r="2" fill="#1B2A41"/><circle cx="10" cy="10" r="2" fill="#1B2A41"/><circle cx="16" cy="10" r="2" fill="#1B2A41"/></svg></div></div></div>
+<span class="tip" style="left:10px;bottom:70px">① 先點 ⋯</span>
+<span class="tip" style="left:10px;bottom:112px">② 再點 分享</span>
 </div>
 </div>
 </div></div></div>
 <div class="cw"><div class="cs"><div class="c">
 <div class="top"><span class="chip">iPhone · Safari</span><span class="st">步驟 3 / 4</span></div>
 <h2 class="t">往下滑，選「加入主畫面」</h2>
-<p class="d">跳出的選單要用手指往上滑，找到「加入主畫面」（圖示是一個方框加上加號）。</p>
+<p class="d">分享選單要用手指往上滑，找到「加入主畫面」（圖示是一個方框加上加號）。</p>
 <div class="stage">
 <div class="ph">
 <div class="dim"></div>
