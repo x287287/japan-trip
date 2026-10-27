@@ -709,10 +709,14 @@ function voiceFor(lang) {
   var list = voices.filter(function (v) { return String(v.lang).toLowerCase().indexOf(pre) === 0; }).sort(function (a, b) { return sc(b) - sc(a); });
   return list[0] || null;
 }
-function stop() { if (synth) synth.cancel(); if (playing) { playing.classList.remove("playing"); playing = null; } }
+var curU = null, spkTimer = 0, lastSpeakAt = 0;
+function stop() { clearTimeout(spkTimer); if (synth) { try { synth.cancel(); } catch (e) {} } curU = null; if (playing) { playing.classList.remove("playing"); playing = null; } }
 function speak(text, btn) {
   if (!synth) return;
   var same = btn && playing === btn; stop(); if (same) return;
+  /* the microphone must not hear (or fight with) the speaker */
+  if (typeof stopRec === "function") stopRec();
+  var nowT = Date.now(); if (!btn && nowT - lastSpeakAt < 600) return; lastSpeakAt = nowT;
   var lang = LANG === "en" ? "en-US" : "ja-JP";
   var say = text.replace(/○+/g, LANG === "en" ? ", " : "、");
   if (LANG === "en") say = say.replace(/Taoyuan/g, "Dow Yuen");
@@ -720,8 +724,13 @@ function speak(text, btn) {
   var v = voiceFor(lang); u.lang = v ? v.lang : lang; if (v) u.voice = v; u.rate = LANG === "en" ? 0.9 : 0.85;
   if (!v) { $("vnote").hidden = false; $("vnote").textContent = "這個裝置沒有找到" + (LANG === "en" ? "英文" : "日文") + "語音，發音可能不標準。可以在手機或電腦的語音設定下載語音。"; }
   if (btn) { playing = btn; btn.classList.add("playing"); }
-  u.onend = u.onerror = function () { if (btn && playing === btn) { btn.classList.remove("playing"); playing = null; } };
-  synth.speak(u);
+  var clear = function () { clearTimeout(wd); if (curU === u) curU = null; if (btn && playing === btn) { btn.classList.remove("playing"); playing = null; } };
+  /* Chrome/Android sometimes never fires onend (or garbage-collects the utterance): keep a reference + a watchdog */
+  var wd = setTimeout(clear, Math.min(20000, 2500 + say.length * 450));
+  u.onend = u.onerror = clear;
+  curU = u;
+  /* speaking right after cancel() is silently dropped on some browsers */
+  spkTimer = setTimeout(function () { try { synth.resume(); synth.speak(u); } catch (e) { clear(); } }, 80);
 }
 var SPK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 function sayBtn(text) {
@@ -818,8 +827,10 @@ function speakCard(o, turnIndex) {
   };
   btn.addEventListener("click", function () {
     if (rec) { if (rec.finish) rec.finish(); return; }
+    if (btn.dataset.busy) return;
     stop();
-    var r = new SRC(); rec = r;
+    var r; try { r = new SRC(); } catch (e) { st.textContent = "這個瀏覽器無法使用語音辨識，請改用 Safari 或 Chrome 開啟。"; return; }
+    rec = r;
     r.lang = LANG === "en" ? "en-US" : "ja-JP"; r.interimResults = true; r.maxAlternatives = 5; r.continuous = false;
     var heard = [], finalHeard = [], errMsg = "", done = false, guard = 0;
     btn.classList.add("rec"); btn.lastChild.textContent = "說完按這裡"; st.textContent = "正在聽…請說話"; res.hidden = true;
@@ -827,8 +838,9 @@ function speakCard(o, turnIndex) {
     function finish() {
       if (done) return; done = true; clearTimeout(guard);
       if (rec === r) rec = null;
+      r.onresult = r.onerror = r.onend = null;
       try { r.abort(); } catch (e) {}
-      btn.classList.remove("rec"); btn.lastChild.textContent = "再說一次";
+      btn.classList.remove("rec"); delete btn.dataset.busy; btn.lastChild.textContent = "再說一次";
       var texts = (finalHeard.length ? finalHeard : heard).filter(function (t) { return t && t.trim(); });
       if (texts.length) showResult(texts);
       else st.textContent = errMsg || "沒有聽到聲音。靠近麥克風，按「開始說」後再說一次。";
@@ -841,7 +853,9 @@ function speakCard(o, turnIndex) {
         if (rs.isFinal) { for (var k = 0; k < rs.length; k++) fin[k] = (fin[k] || "") + rs[k].transcript; }
         interim += rs[0].transcript;
       }
-      heard = [interim]; if (fin.length) finalHeard = fin;
+      /* Android Chrome repeats earlier words in later results: also offer just the last result */
+      var lastT = e.results.length ? e.results[e.results.length - 1][0].transcript : "";
+      heard = interim === lastT ? [interim] : [interim, lastT]; if (fin.length) finalHeard = fin.concat(lastT && e.results[e.results.length - 1].isFinal ? [lastT] : []);
       st.textContent = "聽到：" + interim;
       if (fin.length && e.results[e.results.length - 1].isFinal) finish();
     };
@@ -852,10 +866,19 @@ function speakCard(o, turnIndex) {
     };
     r.onend = finish;
     guard = setTimeout(function () { try { r.stop(); } catch (e) {} guard = setTimeout(finish, 1500); }, 12000);
-    try { r.start(); } catch (e) { errMsg = "無法開始錄音，請再按一次。"; finish(); }
+    /* give the speaker/audio session a moment to release before the mic opens (iOS & Android) */
+    btn.dataset.busy = "1";
+    setTimeout(function () {
+      if (done) return; delete btn.dataset.busy;
+      if (rec !== r) { errMsg = ""; finish(); return; }
+      try { r.start(); } catch (e) { errMsg = "無法開始錄音，請再按一次。"; finish(); }
+    }, 350);
   });
   return card;
 }
+
+document.addEventListener("visibilitychange", function () { if (document.hidden) { stop(); stopRec(); } });
+window.addEventListener("pagehide", function () { stop(); stopRec(); });
 
 /* ---------- home ---------- */
 function syncLang() {
