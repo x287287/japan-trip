@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>加入主畫面教學</title>
+<link rel="icon" href="icon.png"><link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@900&display=swap">
+<style>
+body{margin:0;background:#E9E4D8;font-family:'Noto Sans TC',sans-serif;color:#1B2A41}
+.hd{max-width:520px;margin:0 auto;padding:16px 16px 0}
+.back{display:inline-block;margin-bottom:10px;color:#8A3A2B;font-weight:700;text-decoration:none}
+h1{margin:0 0 12px;font-family:'Noto Serif TC',serif;font-size:26px}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{flex:1;padding:12px;border:2px solid #1B2A41;border-radius:12px;background:#fff;font:700 15px 'Noto Sans TC',sans-serif;white-space:nowrap;color:#1B2A41;cursor:pointer}
+.tabs button[aria-selected=true]{background:#1B2A41;color:#F6F2EA}
+.list{max-width:520px;margin:0 auto;padding:0 16px 32px}
+.cw{margin:0 auto 16px;border-radius:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.cs{width:480px;height:720px;transform-origin:0 0}
+.c{width:480px;height:720px}
+.pn[hidden]{display:none}
+.c{width:480px;height:720px;box-sizing:border-box;padding:36px 36px 0;background:#F6F2EA;color:#1B2A41;font-family:'Noto Sans TC',sans-serif;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:center}
+.chip{font-size:14px;font-weight:700;padding:6px 14px;border-radius:99px;background:#1B2A41;color:#F6F2EA}
+.st{font-size:15px;font-weight:700;color:#8A3A2B}
+.t{margin:0;font-family:'Noto Serif TC',serif;font-size:36px;line-height:1.25;font-weight:900}
+.d{margin:0;font-size:18px;line-height:1.6;color:#33415A}
+.stage{flex:1;display:flex;justify-content:center;align-items:flex-end}
+.ph{width:276px;height:336px;box-sizing:border-box;background:#fff;border:4px solid #1B2A41;border-bottom:0;border-radius:36px 36px 0 0;overflow:hidden;position:relative;font-size:14px}
+.hl{outline:3px solid #C8361F;outline-offset:3px;border-radius:10px}
+.tip{position:absolute;background:#C8361F;color:#fff;font-size:14px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.bar{display:flex;align-items:center;gap:8px;padding:12px 12px 8px}
+.url{background:#fff;border-radius:12px;padding:8px 12px;font-size:12px;text-align:center;color:#33415A;border:1px solid #D9DEE7;margin-bottom:12px}
+.hero{margin:34px 12px 8px;border-radius:14px;background:#1B2A41;color:#F6F2EA;padding:16px;font-family:'Noto Serif TC',serif;font-weight:900;font-size:20px;line-height:1.3}
+.blk{margin:8px 12px;height:44px;border-radius:10px;background:#EEF0F4}
+.dots{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:#fff}
+.menu{position:absolute;right:10px;top:46px;width:200px;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(27,42,65,.28);border:1px solid #D9DEE7;padding:6px 0}
+.mi{padding:9px 14px;font-size:14px;color:#1B2A41}
+.mi.on{background:#FBE9E5;font-weight:700;margin:0 6px;border-radius:8px}
+.dim{position:absolute;inset:0;background:rgba(27,42,65,.35)}
+.dlg{position:absolute;left:18px;right:18px;top:40px;background:#fff;border-radius:18px;padding:18px;box-shadow:0 8px 28px rgba(27,42,65,.35)}
+.fld{border-bottom:2px solid #1B2A41;padding:6px 0;font-size:16px;margin:10px 0 18px}
+.btns{display:flex;justify-content:flex-end;gap:18px;font-weight:700}
+.ic{width:52px;height:52px;border-radius:12px;flex:none;display:block}
+.home{position:absolute;left:0;right:0;bottom:0;height:108px;background:#E4E8EF;display:flex;gap:18px;padding:18px;align-items:flex-start}
+.lb{font-size:11px;text-align:center;margin-top:4px;color:#1B2A41}
+.sb{position:absolute;left:0;right:0;bottom:0;background:#F2F3F6;padding:10px 12px 12px;border-top:1px solid #D9DEE7}
+.tb{display:flex;justify-content:space-around;align-items:center}
+.tb div{width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.sheet{position:absolute;inset:30px 0 0 0;background:#F2F3F6;border-radius:18px 18px 0 0;padding:14px 14px}
+.sh{font-weight:700;font-size:14px;margin-bottom:10px}
+.list{background:#fff;border-radius:12px;overflow:hidden}
+.li{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #E4E8EF;font-size:14px}
+.li:last-child{border-bottom:0}
+.li.on{background:#FBE9E5;font-weight:700}
+.nav{display:flex;justify-content:space-between;align-items:center;font-size:15px;margin-bottom:16px}
+.card{background:#fff;border-radius:12px;padding:12px;display:flex;gap:12px;align-items:center}
+.nm{border-bottom:1px solid #E4E8EF;padding-bottom:6px;font-size:15px;font-weight:700}
+.sm{font-size:12px;color:#5B6679;margin-top:6px}
+.note{margin-top:14px;font-size:12px;color:#5B6679;line-height:1.6}
+.tp .c{width:480px;height:720px;box-sizing:border-box;padding:36px;background:#1B2A41;color:#F6F2EA;font-family:'Noto Sans TC',sans-serif;display:flex;flex-direction:column;gap:18px;overflow:hidden}
+.tp .chip{align-self:flex-start;font-size:14px;font-weight:700;padding:6px 14px;border-radius:99px;background:#F6F2EA;color:#1B2A41}
+.tp .t{margin:0;font-family:'Noto Serif TC',serif;font-size:36px;line-height:1.25;font-weight:900}
+.tp .row{display:flex;gap:14px;align-items:flex-start}
+.tp .n{flex:none;width:32px;height:32px;border-radius:50%;background:#F08A74;color:#1B2A41;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:16px}
+.tp .row b{display:block;font-size:18px;margin-bottom:2px}
+.tp .row span{font-size:16px;line-height:1.55;color:#D5DBE6}
+.tp .ft{margin-top:auto;font-size:14px;color:#B6BFCE;border-top:1px solid #3A4A66;padding-top:14px}
+
+</style></head><body>
+<div class="hd"><a class="back" href="./">← 回到網站</a><h1>加入主畫面教學</h1>
+<div class="tabs" role="tablist"><button role="tab" id="ta" aria-selected="true">Android（Chrome）</button><button role="tab" id="ti" aria-selected="false">iPhone（Safari）</button></div></div>
+<div class="list">
+<div class="pn" id="pa">
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">Android · Chrome</span><span class="st">步驟 1 / 4</span></div>
+<h2 class="t">用 Chrome 開啟網站</h2>
+<p class="d">打開手機的 Chrome，在網址列輸入下方網址，或直接點老師分享的連結。</p>
+<div class="stage">
+<div class="ph">
+<div class="bar"><div class="url hl">x287287.github.io/japan-trip</div></div>
+<div class="hero">公埔國小<br>日本交流行<div style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:13px;margin-top:6px">12/14 – 12/18</div></div>
+<div class="blk"></div><div class="blk"></div>
+<span class="tip" style="left:20px;top:62px">輸入網址</span>
+</div>
+</div>
+</div></div></div>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">Android · Chrome</span><span class="st">步驟 2 / 4</span></div>
+<h2 class="t">點右上角的「⋮」</h2>
+<p class="d">網址列最右邊有三個直排的小點，點一下會打開選單。</p>
+<div class="stage">
+<div class="ph">
+<div class="bar"><div class="url">x287287.github.io/japan-trip</div>
+<div class="dots hl"><svg width="20" height="20" viewBox="0 0 20 20" aria-label="選單" role="img"><circle cx="10" cy="4" r="2" fill="#1B2A41"/><circle cx="10" cy="10" r="2" fill="#1B2A41"/><circle cx="10" cy="16" r="2" fill="#1B2A41"/></svg></div></div>
+<div class="hero">公埔國小<br>日本交流行<div style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:13px;margin-top:6px">12/14 – 12/18</div></div>
+<div class="blk"></div><div class="blk"></div>
+<span class="tip" style="right:12px;top:64px">點這裡</span>
+</div>
+</div>
+</div></div></div>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">Android · Chrome</span><span class="st">步驟 3 / 4</span></div>
+<h2 class="t">選「新增至主畫面」</h2>
+<p class="d">在選單中找到這一項並點選。部分手機會寫成「加到主畫面」或「安裝應用程式」，意思一樣。</p>
+<div class="stage">
+<div class="ph">
+<div class="dim"></div>
+<div class="menu">
+<div class="mi">新分頁</div>
+<div class="mi">新增無痕分頁</div>
+<div class="mi">記錄</div>
+<div class="mi">下載</div>
+<div class="mi on hl">新增至主畫面</div>
+<div class="mi">分享…</div>
+<div class="mi">設定</div>
+</div>
+</div>
+</div>
+</div></div></div>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">Android · Chrome</span><span class="st">步驟 4 / 4</span></div>
+<h2 class="t">按「新增」就完成</h2>
+<p class="d">名稱可以自己改。按下新增後，手機桌面就會出現網站圖示，之後像 App 一樣點開即可。</p>
+<div class="stage">
+<div class="ph">
+<div class="home"><div><img class="ic" src="icon.png" alt=""><div class="lb">日本交流行</div></div></div>
+<div class="dim"></div>
+<div class="dlg">
+<div style="font-weight:700;font-size:16px">新增至主畫面</div>
+<div class="fld">日本交流行</div>
+<div class="btns"><span>取消</span><span class="hl" style="color:#B02A15;padding:2px 8px">新增</span></div>
+</div>
+</div>
+</div>
+</div></div></div>
+</div>
+<div class="pn" id="pi" hidden>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">iPhone · Safari</span><span class="st">步驟 1 / 4</span></div>
+<h2 class="t">一定要用 Safari 開啟</h2>
+<p class="d">iPhone 只有 Safari 能加入主畫面。如果是從 LINE 或 Facebook 點開的，請先選「在 Safari 中開啟」。</p>
+<div class="stage">
+<div class="ph">
+<div class="hero">公埔國小<br>日本交流行<div style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:13px;margin-top:6px">12/14 – 12/18</div></div>
+<div class="blk"></div><div class="blk"></div>
+<div class="sb"><div class="url hl">x287287.github.io/japan-trip</div></div>
+<span class="tip" style="left:20px;bottom:62px">Safari 網址列</span>
+</div>
+</div>
+</div></div></div>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">iPhone · Safari</span><span class="st">步驟 2 / 4</span></div>
+<h2 class="t">點下方的「分享」</h2>
+<p class="d">畫面底部工具列中間，有一個「方框加向上箭頭」的圖示，點它。</p>
+<div class="stage">
+<div class="ph">
+<div class="hero">公埔國小<br>日本交流行<div style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:13px;margin-top:6px">12/14 – 12/18</div></div>
+<div class="blk"></div><div class="blk"></div>
+<div class="sb"><div class="url">x287287.github.io/japan-trip</div>
+<div class="tb">
+<div><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4l-6 6 6 6"/></svg></div>
+<div><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 4l6 6-6 6"/></svg></div>
+<div class="hl"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="分享"><path d="M7 9H5v10h12V9h-2M11 14V3M7.5 6.5L11 3l3.5 3.5"/></svg></div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h12v15l-6-4-6 4z"/></svg></div>
+<div><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#1B2A41" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><rect x="9" y="9" width="10" height="10" rx="2" fill="#F2F3F6"/></svg></div>
+</div></div>
+<span class="tip" style="left:96px;bottom:84px">點這裡</span>
+</div>
+</div>
+</div></div></div>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">iPhone · Safari</span><span class="st">步驟 3 / 4</span></div>
+<h2 class="t">往下滑，選「加入主畫面」</h2>
+<p class="d">跳出的選單要用手指往上滑，找到「加入主畫面」（圖示是一個方框加上加號）。</p>
+<div class="stage">
+<div class="ph">
+<div class="dim"></div>
+<div class="sheet">
+<div class="sh">日本交流行<div style="font-weight:400;font-size:12px;color:#5B6679">x287287.github.io</div></div>
+<div class="list">
+<div class="li"><span>加入書籤</span><span>☆</span></div>
+<div class="li"><span>加入「我的最愛」</span><span>♡</span></div>
+<div class="li on hl"><span>加入主畫面</span><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#1B2A41" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2" width="14" height="14" rx="3"/><path d="M9 5.5v7M5.5 9h7"/></svg></div>
+<div class="li"><span>加入閱讀列表</span><span>◎</span></div>
+</div>
+</div>
+</div>
+</div>
+</div></div></div>
+<div class="cw"><div class="cs"><div class="c">
+<div class="top"><span class="chip">iPhone · Safari</span><span class="st">步驟 4 / 4</span></div>
+<h2 class="t">按右上角「加入」</h2>
+<p class="d">名稱可以自己修改。按下「加入」後，主畫面就會多一個圖示，之後直接點它就能開啟。</p>
+<div class="stage">
+<div class="ph">
+<div class="sheet">
+<div class="nav"><span style="color:#2563EB">取消</span><b>加入主畫面</b><span class="hl" style="color:#1D4FC4;font-weight:700;padding:2px 8px">加入</span></div>
+<div class="card"><img class="ic" src="icon.png" alt=""><div style="flex:1"><div class="nm">日本交流行</div><div class="sm">x287287.github.io/japan-trip</div></div></div>
+<div class="note">網站會像 App 一樣放在主畫面，開啟時沒有網址列。</div>
+</div>
+</div>
+</div>
+</div></div></div>
+</div>
+<div class="cw"><div class="cs tp"><div class="c">
+<span class="chip">加入之後</span>
+<h2 class="t">像 App 一樣使用</h2>
+<div class="row"><div class="n">1</div><div><b>從主畫面圖示開啟</b><span>全螢幕顯示，沒有網址列，打開就能看行程。</span></div></div>
+<div class="row"><div class="n">2</div><div><b>第一次請登入</b><span>用中文姓名申請帳號並選擇身分（師長、學生、家長、隨行家長），核准後登入，之後在同一支手機通常不用再登入。</span></div></div>
+<div class="row"><div class="n">3</div><div><b>網站更新時</b><span>內容有更新時，把畫面往下拉重新整理，就會看到最新版。</span></div></div>
+<div class="row"><div class="n">4</div><div><b>找不到圖示？</b><span>Android 請看桌面最後一頁；iPhone 請往左滑到最後一頁，或在資料庫搜尋「日本交流行」。</span></div></div>
+<div class="ft">公埔國小 115 學年度日本國際交流<br>x287287.github.io/japan-trip</div>
+</div></div></div>
+
+</div>
+<script>
+function fit(){var w=Math.min(480,document.querySelector('.list').clientWidth-32);var s=w/480;document.querySelectorAll('.cw').forEach(function(e){if(!e.offsetParent)return;e.style.width=w+'px';e.style.height=720*s+'px';e.firstElementChild.style.transform='scale('+s+')'})}
+function pick(a){document.getElementById('pa').hidden=!a;document.getElementById('pi').hidden=a;document.getElementById('ta').setAttribute('aria-selected',a);document.getElementById('ti').setAttribute('aria-selected',!a);fit()}
+document.getElementById('ta').onclick=function(){pick(true)};document.getElementById('ti').onclick=function(){pick(false)};
+if(/iPhone|iPad|iPod/.test(navigator.userAgent))pick(false);
+addEventListener('resize',fit);addEventListener('load',fit);fit();
+</script></body></html>
