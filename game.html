@@ -216,7 +216,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     </header>
 
     <div class="profile">
-      <div class="pf-head"><h2>我的資料</h2><div class="tgls"><button class="toggle" id="speakToggle" type="button" aria-pressed="true">口說練習：開</button><button class="toggle" id="zhToggle" type="button" aria-pressed="true">中文翻譯：開</button></div></div>
+      <div class="pf-head"><h2>我的資料</h2><div class="tgls"><button class="toggle" id="zhToggle" type="button" aria-pressed="true">中文翻譯：開</button></div></div>
       <div class="langrow"><span class="flab">我要練習</span><div class="seg" id="langSeg" role="group" aria-label="練習語言"><button type="button" data-lang="ja" aria-pressed="true"><b lang="ja">日本語</b><small>日文</small></button><button type="button" data-lang="en" aria-pressed="false"><b lang="en">English</b><small>英文</small></button></div></div>
       <div class="pf-grid">
         <label class="fld" for="pname"><span>我的名字</span><input id="pname" type="text" maxlength="12" placeholder="例如：王小明"></label>
@@ -234,8 +234,6 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     <div class="howto">
       <div><b>怎麼玩：</b>先填好我的資料，再點一個場景進去。操控自己的角色走到頭上有「！」的人物旁邊開始對話；其他路人也可以點點看。對話時按「聽」聽發音，按回答卡片就是選它。</div>
       <div><b>星星：</b>第一次就選對越多題，星星越多。選錯沒關係，看完說明再選一次。</div>
-      <div><b>口說練習：</b>每句選對後，按麥克風念出那句話，電腦會用語音辨識聽你說了什麼，並給 0–100 分。第一次使用時，瀏覽器會詢問是否允許麥克風，請按「允許」。</div>
-      <div><b>關於錄音：</b>語音辨識由瀏覽器提供（Chrome、Edge 由 Google，Safari 由 Apple），說話的聲音會送到他們的伺服器轉成文字。這個網站不會保存錄音或文字。<span id="speakNote"></span></div>
       <div><b>挑戰模式：</b><span id="howtoMode"></span></div>
     </div>
     <p class="vnote" id="vnote" hidden></p>
@@ -742,7 +740,7 @@ function sayBtn(text) {
 if (!synth) { $("vnote").hidden = false; $("vnote").textContent = "這個瀏覽器不支援語音朗讀，仍然可以看文字作答。"; }
 
 /* ---------- speaking practice: browser speech recognition + scoring ---------- */
-var SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+var SRC = null; /* 口說練習（語音辨識）已停用：各裝置不穩定 */
 var speakOn = SRC ? load("gp-kouryu-speak", true) : false;
 var speakBest = load("gp-kouryu-speak-best", {});
 var rec = null, spoken = [];
@@ -1350,12 +1348,7 @@ function finish() {
   toBottom();
 }
 
-function syncSpeak() {
-  var t = $("speakToggle");
-  if (!SRC) { t.hidden = true; $("speakNote").textContent = "這個瀏覽器不支援語音辨識，口說練習無法使用。請改用 Chrome、Edge 或 Safari 開啟。"; return; }
-  t.setAttribute("aria-pressed", speakOn ? "true" : "false"); t.textContent = speakOn ? "口說練習：開" : "口說練習：關";
-}
-$("speakToggle").addEventListener("click", function () { speakOn = !speakOn; keep("gp-kouryu-speak", speakOn); syncSpeak(); });
+function syncSpeak() {}
 syncSpeak(); syncZh(); buildPicks(); syncLang();
 })();
 </script>
