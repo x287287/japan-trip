@@ -1,12 +1,12 @@
 /* 離線快取：只快取網頁本身、腳本與字型；資料庫請求一律不快取。 */
-const C = "gp-shell-v3";
+const C = "gp-shell-v4";
 // 每個頁面各自快取：首頁存成 "./"，其他頁面（例如 game.html）用自己的網址
 const pageKey = (u) => (/\/(index\.html)?$/.test(u.pathname) ? "./" : u.origin + u.pathname);
 const PRE = [
   "./",
   "icon.png",
   "install.html",
-  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js",
+  "supabase.js",
   "https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap"
 ];
 self.addEventListener("install", (e) => {
