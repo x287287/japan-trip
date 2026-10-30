@@ -1,5 +1,5 @@
 /* 離線快取：只快取網頁本身、腳本與字型；資料庫請求一律不快取。 */
-const C = "gp-shell-v4";
+const C = "gp-shell-v5";
 // 每個頁面各自快取：首頁存成 "./"，其他頁面（例如 game.html）用自己的網址
 const pageKey = (u) => (/\/(index\.html)?$/.test(u.pathname) ? "./" : u.origin + u.pathname);
 const PRE = [
@@ -7,7 +7,9 @@ const PRE = [
   "icon.png",
   "install.html",
   "supabase.js",
-  "https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700;900&family=DM+Mono:wght@400;500&display=swap"
+  "fonts/sans-400.woff2",
+  "fonts/sans-700.woff2",
+  "fonts/serif-900.woff2"
 ];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(C).then((c) => Promise.all(PRE.map((u) => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
