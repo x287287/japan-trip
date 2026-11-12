@@ -1,0 +1,15 @@
+# 讓 Supabase 免費專案不會因為「一週沒人用」被暫停：每 2 天自動戳一下資料庫。
+# 不需要任何密碼；用的是網站本來就公開的金鑰（index.html 裡的 publishable key）。
+name: Keep Supabase awake
+on:
+  schedule:
+    - cron: "17 3 */2 * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping database
+        run: |
+          curl -fsS "https://jvzjpwcjrdyhsooyyxbv.supabase.co/rest/v1/site_content?select=id&limit=1" \
+            -H "apikey: sb_publishable_vxDpLTQPoTnRMc1dgxDbag_X4jH0vqv" > /dev/null
