@@ -11,5 +11,9 @@ jobs:
     steps:
       - name: Ping database
         run: |
-          curl -fsS "https://jvzjpwcjrdyhsooyyxbv.supabase.co/rest/v1/site_content?select=id&limit=1" \
-            -H "apikey: sb_publishable_vxDpLTQPoTnRMc1dgxDbag_X4jH0vqv" > /dev/null
+          # 這張表要登入才能讀，所以會回「沒有權限」，但那代表資料庫有被叫醒，算成功。
+          code=$(curl -sS -o body.txt -w "%{http_code}" \
+            "https://jvzjpwcjrdyhsooyyxbv.supabase.co/rest/v1/site_content?select=id&limit=1" \
+            -H "apikey: sb_publishable_vxDpLTQPoTnRMc1dgxDbag_X4jH0vqv")
+          echo "HTTP $code"; cat body.txt; echo
+          if [ "$code" = "000" ] || [ "$code" -ge 500 ]; then exit 1; fi
